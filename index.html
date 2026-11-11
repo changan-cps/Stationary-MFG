@@ -1141,18 +1141,21 @@ async function renderReorder(){
   await refreshReorderBadge();
   const nomin = ITEMS.filter(x => STOCK[x.code] && !STOCK[x.code].min && !STOCK[x.code].max).length;
   if (!reorderList.length) { out.innerHTML = `<div class="empty">ยังไม่มีรายการที่ต้องสั่งซื้อ${nomin ? `<br><span style="font-size:15px">(มี ${nomin} รายการที่ยังไม่ได้ตั้ง Min/Max — รายการเหล่านี้จะขึ้นเมื่อของไม่พอตามคำขอเท่านั้น)</span>` : ''}</div>`; return; }
-  const g = {}; reorderList.forEach(r => (g[r.x.sup || 'ไม่ระบุ'] = g[r.x.sup || 'ไม่ระบุ'] || []).push(r));
-  let grand = 0;
-  out.innerHTML = Object.keys(g).sort().map(sup => {
-    const t = g[sup].reduce((s, r) => s + r.sug * r.x.inc, 0); grand += t;
-    return `<div class="panel"><h3><span>${esc(sup)} · ${g[sup].length} รายการ</span><span style="color:var(--brand)">฿${baht(t)}</span></h3>
-      <div style="overflow:auto"><table class="t"><thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th class="n">คงเหลือ</th><th class="n">ขอเบิกค้าง</th><th class="n">ใช้ได้</th><th class="n">Min</th><th class="n">Max</th><th class="n">แนะนำสั่ง</th><th>เหตุผล</th><th class="n">มูลค่า</th></tr></thead><tbody>
-      ${g[sup].map(r => `<tr class="${r.avail < 0 ? 'out' : 'low'}"><td class="mono">${r.x.code}</td><td>${esc(r.x.th || r.x.en)}${r.d.reqs.length ? `<div style="font-size:13px;color:var(--mute)">จากคำขอ ${r.d.reqs.map(esc).join(', ')}</div>` : ''}</td><td>${esc(r.x.unit)}</td>
-        <td class="n">${int(r.s.onHand)}</td><td class="n" title="รออนุมัติ ${r.d.pend} · รอจ่าย ${r.d.appr}">${int(r.d.qty)}</td><td class="n"><b class="${r.avail < 0 ? 'diffn' : ''}">${int(r.avail)}</b></td>
-        <td class="n">${int(r.s.min)}</td><td class="n">${int(r.s.max)}</td><td class="n"><b style="font-size:18px;color:var(--brand)">${int(r.sug)}</b></td>
-        <td>${r.avail < 0 ? '<span class="s-out">● ' + r.why + '</span>' : '<span class="s-low">● ' + r.why + '</span>'}</td><td class="n">${baht(r.sug * r.x.inc)}</td></tr>`).join('')}
-      </tbody></table></div></div>`;
-  }).join('') + `<div class="panel" style="display:flex;justify-content:space-between;font-size:20px;font-weight:700"><span>รวมมูลค่าที่ต้องสั่งซื้อ (รวม VAT)</span><span style="color:var(--brand)">฿${baht(grand)}</span></div>`;
+  const rows = [...reorderList].sort((p, q) => (p.x.sup || 'ฮ').localeCompare(q.x.sup || 'ฮ') || p.x.code.localeCompare(q.x.code));
+  const grand = rows.reduce((t, r) => t + r.sug * r.x.inc, 0);
+  const sups = new Set(rows.map(r => r.x.sup || 'ไม่ระบุ')).size;
+  out.innerHTML = `<div class="stats" style="margin-bottom:14px">
+      <div class="stat"><div class="k">รายการที่ต้องสั่ง</div><div class="v" style="color:var(--bad)">${int(rows.length)}</div></div>
+      <div class="stat"><div class="k">Supplier</div><div class="v">${int(sups)}</div></div>
+      <div class="stat"><div class="k">มูลค่ารวม (รวม VAT)</div><div class="v" style="color:var(--brand)">฿${baht(grand)}</div></div></div>
+    <div class="tbl-wrap"><table class="t"><thead><tr><th>#</th><th>Supplier</th><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th class="n">คงเหลือ</th><th class="n">ขอเบิกค้าง</th><th class="n">ใช้ได้</th><th class="n">Min</th><th class="n">Max</th><th class="n">แนะนำสั่ง</th><th>เหตุผล</th><th class="n">ราคา/หน่วย</th><th class="n">มูลค่า</th><th>จากคำขอ</th></tr></thead><tbody>
+    ${rows.map((r, i) => `<tr class="${r.avail < 0 ? 'out' : 'low'}"><td>${i + 1}</td><td style="white-space:nowrap"><b>${esc(r.x.sup || 'ไม่ระบุ')}</b></td><td class="mono">${r.x.code}</td><td style="min-width:220px">${esc(r.x.th || r.x.en)}</td><td>${esc(r.x.unit)}</td>
+      <td class="n">${int(r.s.onHand)}</td><td class="n" title="รออนุมัติ ${r.d.pend} · รอจ่าย ${r.d.appr}">${int(r.d.qty)}</td><td class="n"><b class="${r.avail < 0 ? 'diffn' : ''}">${int(r.avail)}</b></td>
+      <td class="n">${int(r.s.min)}</td><td class="n">${int(r.s.max)}</td><td class="n"><b style="font-size:19px;color:var(--brand)">${int(r.sug)}</b></td>
+      <td style="white-space:nowrap">${r.avail < 0 ? '<span class="s-out">● ' + r.why + '</span>' : '<span class="s-low">● ' + r.why + '</span>'}</td>
+      <td class="n">${baht(r.x.inc)}</td><td class="n">${baht(r.sug * r.x.inc)}</td><td class="mono" style="font-size:14px;white-space:nowrap;padding-right:16px">${r.d.reqs.map(esc).join('<br>')}</td></tr>`).join('')}
+    <tr><td colspan="13" class="n"><b style="font-size:18px">รวมมูลค่าที่ต้องสั่งซื้อ (รวม VAT)</b></td><td class="n"><b style="font-size:18px;color:var(--brand)">฿${baht(grand)}</b></td><td></td></tr>
+    </tbody></table></div>`;
 }
 function exportReorder(){
   const rows = [['Supplier','รหัสสินค้า','รายการ','English','หน่วย','คงเหลือ','ขอเบิกค้าง','ใช้ได้','Min','Max','จำนวนแนะนำสั่ง','เหตุผล','ราคา/หน่วย ไม่รวม VAT','ราคา/หน่วย รวม VAT','มูลค่า รวม VAT','จากคำขอ']];
