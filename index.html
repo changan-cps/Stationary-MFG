@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ระบบขอเบิกเครื่องเขียน & Stock · Changan Rayong</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#f3f5f9; --card:#fff; --ink:#14213d; --mute:#5b6478; --line:#dde2ec;
+  --brand:#0b3d91; --brand2:#1659c7; --soft:#e8effc; --ok:#13804b; --okbg:#e3f5ec;
+  --warn:#9a6200; --warnbg:#fff3d6; --bad:#b42318; --badbg:#fde8e6; --info:#5a32a3; --infobg:#efe9fb;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:17px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1320px;margin:0 auto;padding:0 20px}
+header{background:var(--brand);color:#fff;position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.hbar{display:flex;align-items:center;gap:16px;height:68px}
+.logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:21px;white-space:nowrap}
+.logo .ic{width:40px;height:40px;border-radius:10px;background:#fff;color:var(--brand);display:grid;place-items:center;font-size:22px}
+.logo small{display:block;font-weight:500;font-size:13px;opacity:.8;margin-top:-4px}
+nav{display:flex;gap:4px;margin-left:12px;flex:1;overflow-x:auto}
+nav button{background:transparent;border:0;color:#d6e2ff;padding:10px 16px;border-radius:10px;font-weight:600;font-size:17px;white-space:nowrap}
+nav button.on{background:rgba(255,255,255,.16);color:#fff}
+nav button .n{display:inline-block;min-width:22px;padding:0 6px;margin-left:6px;border-radius:11px;background:#ffcf4a;color:#3b2a00;font-size:13px;line-height:22px}
+.cartbtn{background:#fff;color:var(--brand);border:0;border-radius:12px;padding:10px 18px;font-weight:700;font-size:17px;display:flex;gap:10px;align-items:center;white-space:nowrap}
+.cartbtn .n{background:var(--brand);color:#fff;border-radius:12px;min-width:26px;line-height:26px;text-align:center;font-size:15px;padding:0 7px}
+.banner{background:var(--warnbg);color:var(--warn);padding:10px 20px;font-size:15px;text-align:center;display:none}
+main{padding:22px 0 60px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{flex:1;min-width:260px;position:relative}
+.search input{width:100%;padding:13px 16px 13px 46px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:17px}
+.search input:focus{outline:none;border-color:var(--brand2);box-shadow:0 0 0 3px var(--soft)}
+.search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--mute)}
+.sel{padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:16px;font-weight:500;color:var(--ink)}
+.chip b{color:var(--mute);font-weight:500;margin-left:4px;font-size:14px}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip.on b{color:#cfe0ff}
+.count{color:var(--mute);font-size:15px;margin:-6px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s,border-color .15s}
+.item:hover{box-shadow:0 6px 20px rgba(20,33,61,.08);border-color:#c7d2e6}
+.item .pic{height:170px;background:#fff;display:grid;place-items:center;padding:12px;border-bottom:1px solid #eef1f6;cursor:zoom-in}
+.item .pic img{max-width:100%;max-height:146px;object-fit:contain}
+.item .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:3px;flex:1}
+.item .th{font-weight:600;font-size:17px;line-height:1.35;cursor:pointer}
+.item .en{font-size:14px;color:var(--mute);line-height:1.35}
+.item .code{font-size:13px;color:var(--mute);font-family:ui-monospace,Menlo,Consolas,monospace}
+.item .row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:auto;padding-top:10px;gap:8px}
+.price{font-weight:700;font-size:20px;color:var(--brand)}
+.price small{font-size:13px;color:var(--mute);font-weight:500}
+.add{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-weight:600;font-size:16px}
+.add:hover{background:var(--brand2)}
+.step{display:flex;align-items:center;border:1.5px solid var(--brand);border-radius:10px;overflow:hidden;background:#fff}
+.step button{border:0;background:var(--soft);color:var(--brand);width:36px;height:38px;font-size:20px;font-weight:700}
+.step input{width:50px;border:0;text-align:center;font-weight:700;font-size:17px;height:38px;-moz-appearance:textfield}
+.step input::-webkit-inner-spin-button{-webkit-appearance:none}
+.empty{text-align:center;color:var(--mute);padding:60px 20px;font-size:18px}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:40;display:none}
+.scrim.on{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:#fff;z-index:50;transform:translateX(100%);transition:transform .22s;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.15)}
+.drawer.on{transform:none}
+.dh{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font-size:22px}
+.x{border:0;background:var(--bg);width:40px;height:40px;border-radius:10px;font-size:22px;color:var(--mute)}
+.db{flex:1;overflow:auto;padding:16px 22px}
+.line{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #eef1f6}
+.line img{width:56px;height:56px;object-fit:contain;background:#fff;border:1px solid #eef1f6;border-radius:8px}
+.line .t{font-weight:600;font-size:16px;line-height:1.3}
+.line .s{font-size:14px;color:var(--mute)}
+.line .r{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.line .amt{font-weight:700;font-size:16px}
+.rm{border:0;background:none;color:var(--bad);font-size:14px;padding:0}
+.tot{background:var(--soft);border-radius:12px;padding:12px 16px;margin:14px 0;font-size:16px}
+.tot div{display:flex;justify-content:space-between}
+.tot .big{font-weight:700;font-size:20px;color:var(--brand);margin-top:4px}
+fieldset{border:0;padding:0;margin:0}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:15px;font-weight:600;color:var(--mute)}
+.form label.full{grid-column:1/-1}
+.form input,.form textarea,.form select{padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:17px;font-weight:400;color:var(--ink);background:#fff}
+.form input:focus,.form textarea:focus{outline:none;border-color:var(--brand2)}
+.req{color:var(--bad)}
+.df{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px}
+.btn{white-space:nowrap;border:0;border-radius:12px;padding:13px 20px;font-weight:700;font-size:17px}
+.btn.pri{background:var(--brand);color:#fff;flex:1}
+.btn.pri:disabled{background:#9aa8c2;cursor:not-allowed}
+.btn.sec{background:var(--bg);color:var(--ink);border:1.5px solid var(--line)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.bad{background:#fff;color:var(--bad);border:1.5px solid #f2b8b2}
+.btn.sm{padding:8px 14px;font-size:15px;border-radius:10px}
+.err{color:var(--bad);font-size:15px;margin-top:8px}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:60;display:none;place-items:center;padding:20px;background:rgba(10,20,40,.5)}
+.modal.on{display:grid}
+.mbox{background:#fff;border-radius:18px;max-width:820px;width:100%;max-height:90vh;overflow:auto;position:relative}
+.mbox .x{position:absolute;right:14px;top:14px}
+.detail{display:grid;grid-template-columns:320px 1fr;gap:24px;padding:28px}
+.detail .big{background:#fff;border:1px solid var(--line);border-radius:14px;display:grid;place-items:center;padding:16px;min-height:280px}
+.detail .big img{max-width:100%;max-height:300px;object-fit:contain}
+.detail h3{margin:0 0 4px;font-size:24px;line-height:1.3;padding-right:40px}
+.detail .en{color:var(--mute);font-size:17px}
+.detail .cn{color:var(--mute);font-size:16px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0;font-size:16px}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0;font-weight:600}
+.spec{white-space:pre-line;background:var(--bg);border-radius:12px;padding:12px 14px;font-size:15px;color:#2b3550;max-height:220px;overflow:auto}
+.done{padding:36px 30px;text-align:center}
+.done .big{font-size:52px}
+.done h3{font-size:24px;margin:6px 0}
+.done .no{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:22px;font-weight:700;color:var(--brand);background:var(--soft);display:inline-block;padding:6px 16px;border-radius:10px;margin:8px 0 18px}
+.done .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* requests */
+.reqs{display:flex;flex-direction:column;gap:12px}
+.rq{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.rqh{display:grid;grid-template-columns:1fr auto;gap:10px;padding:14px 18px;cursor:pointer;align-items:center}
+.rqh .no{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:17px;color:var(--brand)}
+.rqh .meta{color:var(--mute);font-size:15px}
+.rqh .who{font-weight:600;font-size:17px}
+.rqr{display:flex;align-items:center;gap:14px}
+.rqr .amt{font-weight:700;font-size:19px}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:700;white-space:nowrap}
+.b-pending{background:var(--warnbg);color:var(--warn)}
+.b-approved{background:var(--soft);color:var(--brand)}
+.b-issued{background:var(--okbg);color:var(--ok)}
+.b-rejected{background:var(--badbg);color:var(--bad)}
+.b-cancelled{background:#eceef2;color:#5b6478}
+.rqb{border-top:1px solid #eef1f6;padding:12px 18px 16px;display:none}
+.rq.open .rqb{display:block}
+table.t{width:100%;border-collapse:collapse;font-size:16px}
+table.t th{text-align:left;color:var(--mute);font-weight:600;font-size:14px;padding:8px 10px;border-bottom:1.5px solid var(--line);background:#fafbfd}
+table.t td{padding:8px 10px;border-bottom:1px solid #eef1f6;vertical-align:top}
+table.t td.n,table.t th.n{text-align:right;white-space:nowrap}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.note{background:var(--bg);border-radius:10px;padding:8px 12px;margin-top:10px;font-size:15px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.acts input{flex:1;min-width:200px;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 18px}
+.stat .k{color:var(--mute);font-size:15px;font-weight:600}
+.stat .v{font-size:30px;font-weight:700;line-height:1.2}
+.subtabs{display:flex;gap:6px;margin-bottom:14px}
+.subtabs button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 16px;font-weight:600;font-size:16px}
+.subtabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:16px}
+.panel h3{margin:0 0 10px;font-size:19px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:12px;font-size:16px;z-index:90;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.hide{display:none!important}
+.loading{color:var(--mute);padding:30px;text-align:center}
+@media (max-width:760px){
+  .logo small{display:none}.logo{font-size:17px}
+  .hbar{height:auto;flex-wrap:wrap;padding:10px 0;gap:8px}
+  nav{order:3;flex-basis:100%;margin:0}
+  .cartbtn{margin-left:auto}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .item .pic{height:130px}.item .pic img{max-height:110px}
+  .detail{grid-template-columns:1fr;padding:20px}
+  .form{grid-template-columns:1fr}
+  .rqh{grid-template-columns:1fr}
+}
+
+table.t td.mono{white-space:nowrap}
+
+.stock{font-size:14px;font-weight:600;margin-top:2px}
+.s-ok{color:var(--ok)} .s-low{color:var(--warn)} .s-out{color:var(--bad)}
+.login{max-width:420px;margin:40px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px}
+.login h2{margin:0 0 6px;font-size:24px}
+.login p{color:var(--mute);margin:0 0 18px;font-size:16px}
+.tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:auto;max-height:70vh}
+.tbl-wrap table.t th{position:sticky;top:0;z-index:1}
+table.t td input.ni{width:84px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;font-size:16px;text-align:right}
+table.t td input.ti{width:110px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;font-size:15px}
+table.t td input.changed{border-color:var(--brand2);background:var(--soft)}
+table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
+.diffp{color:var(--ok);font-weight:700}.diffn{color:var(--bad);font-weight:700}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:220px 1fr 130px;gap:12px;align-items:center;font-size:16px}
+.bar .tr{background:#eef1f6;border-radius:6px;height:24px;overflow:hidden}
+.bar .fill{background:var(--brand2);height:100%;border-radius:6px}
+.bar .v{text-align:right;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pick{position:relative}
+.pick .dd{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:20;max-height:340px;overflow:auto;display:none}
+.pick .dd.on{display:block}
+.pick .dd div{padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;font-size:16px;border-bottom:1px solid #f0f2f6}
+.pick .dd div:hover{background:var(--soft)}
+.issue td input.ni{width:80px}
+.demo{background:#ede7fb;color:var(--info)}
+.linkbtn{border:0;background:none;color:var(--brand2);font-weight:600;padding:0;font-size:inherit;text-decoration:underline}
+.spin{display:inline-block;width:18px;height:18px;border:2.5px solid #c9d4ea;border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}.bar{grid-template-columns:120px 1fr 90px;font-size:14px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hbar">
+    <div class="logo"><div class="ic"><img src="icon.png" alt="" style="width:34px;height:34px"></div><div>ขอเบิกเครื่องเขียน<small>Stationery Request & Stock · Changan Rayong</small></div></div>
+    <nav id="nav">
+      <button data-v="catalog" class="on">แคตตาล็อก</button>
+      <button data-v="mine">คำขอของฉัน</button>
+      <button data-v="admin">ผู้ดูแล / Stock<span class="n hide" id="pendN">0</span></button>
+    </nav>
+    <button class="cartbtn" id="openCart">🛒 ตะกร้า <span class="n" id="cartN">0</span></button>
+  </div>
+</header>
+<div class="banner" id="banner"></div>
+
+<main class="wrap">
+  <!-- CATALOG -->
+  <section id="v-catalog">
+    <div class="toolbar">
+      <div class="search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="ค้นหา ชื่อไทย / English / 中文 / รหัสสินค้า เช่น ปากกา, A4, O1-0701…">
+      </div>
+      <select class="sel" id="sort">
+        <option value="">เรียงตามแคตตาล็อก</option>
+        <option value="pa">ราคา ต่ำ → สูง</option>
+        <option value="pd">ราคา สูง → ต่ำ</option>
+        <option value="nm">ชื่อ ก → ฮ</option>
+        <option value="st">มีของในคลังก่อน</option>
+      </select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- MY REQUESTS -->
+  <section id="v-mine" class="hide">
+    <div class="toolbar">
+      <h2 style="margin:0;font-size:24px;flex:1">คำขอของฉัน</h2>
+      <div class="search" style="max-width:380px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="mineEmp" placeholder="ใส่รหัสพนักงาน แล้วกด Enter"></div>
+      <button class="btn pri sm" style="flex:0" id="mineLoad">ดูคำขอ</button>
+    </div>
+    <div id="mineList" class="reqs"><div class="empty">ใส่รหัสพนักงานเพื่อดูสถานะคำขอ</div></div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="v-admin" class="hide">
+    <div id="adminLogin" class="login">
+      <h2>เข้าสู่ระบบผู้ดูแล</h2>
+      <p>สำหรับผู้อนุมัติ / ผู้ดูแลคลังเครื่องเขียน</p>
+      <form id="loginForm" class="form" style="grid-template-columns:1fr">
+        <label>ชื่อผู้ดูแล<input name="by" required placeholder="ชื่อที่จะบันทึกในประวัติ"></label>
+        <label>PIN<input name="pin" type="password" required inputmode="numeric"></label>
+      </form>
+      <div class="err" id="loginErr"></div>
+      <button class="btn pri" style="width:100%;margin-top:14px" id="loginBtn">เข้าสู่ระบบ</button>
+    </div>
+
+    <div id="adminApp" class="hide">
+      <div class="toolbar" style="justify-content:space-between">
+        <div class="subtabs" id="subtabs" style="flex-wrap:wrap;margin:0">
+          <button data-s="req" class="on">คำขอเบิก</button>
+          <button data-s="stock">Stock คงเหลือ</button>
+          <button data-s="reorder">ต้องสั่งซื้อ</button>
+          <button data-s="recv">รับเข้า</button>
+          <button data-s="count">ตรวจนับ</button>
+          <button data-s="txn">ความเคลื่อนไหว</button>
+          <button data-s="rep">รายงาน</button>
+        </div>
+        <div style="color:var(--mute);font-size:15px">👤 <b id="adminName"></b> · <button class="linkbtn" id="logout">ออกจากระบบ</button></div>
+      </div>
+      <div id="seedBox" class="panel hide"></div>
+
+      <!-- requests -->
+      <div id="s-req">
+        <div class="stats" id="reqStats"></div>
+        <div class="toolbar">
+          <select class="sel" id="fStatus">
+            <option value="pending">รออนุมัติ</option>
+            <option value="approved">อนุมัติแล้ว (รอจ่ายของ)</option>
+            <option value="issued">จ่ายของแล้ว</option>
+            <option value="rejected">ไม่อนุมัติ</option>
+            <option value="cancelled">ยกเลิกโดยผู้ขอ</option>
+            <option value="">ทั้งหมด</option>
+          </select>
+          <input type="month" class="sel" id="fMonth">
+          <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="fq" type="search" placeholder="ค้นหา เลขที่ / ชื่อ / แผนก / Cost center"></div>
+          <button class="btn sec sm" id="reqReload">↻ รีเฟรช</button>
+          <button class="btn sec sm" id="expReq">⬇ CSV</button>
+        </div>
+        <div id="adminList" class="reqs"></div>
+      </div>
+
+      <!-- stock -->
+      <div id="s-stock" class="hide">
+        <div class="stats" id="stockStats"></div>
+        <div class="toolbar">
+          <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="sq" type="search" placeholder="ค้นหาสินค้า / รหัส / ที่เก็บ"></div>
+          <select class="sel" id="sCat"></select>
+          <select class="sel" id="sFilter">
+            <option value="">ทุกรายการ</option>
+            <option value="low">ถึงจุดสั่งซื้อ (≤ Min)</option>
+            <option value="out">หมด (0)</option>
+            <option value="has">มีของ</option>
+            <option value="nomin">ยังไม่ตั้ง Min/Max</option>
+          </select>
+          <button class="btn sec sm" id="expStock">⬇ CSV</button>
+          <button class="btn pri sm" style="flex:0" id="saveMM" disabled>บันทึก Min/Max</button>
+        </div>
+        <div class="tbl-wrap"><table class="t" id="stockTbl"></table></div>
+      </div>
+
+      <!-- reorder -->
+      <div id="s-reorder" class="hide">
+        <div class="toolbar">
+          <div style="flex:1;color:var(--mute);font-size:16px">รายการที่คงเหลือ ≤ Min · จำนวนแนะนำ = Max − คงเหลือ (หักยอดที่อนุมัติแล้วรอจ่าย)</div>
+          <button class="btn sec sm" id="expReorder">⬇ CSV สำหรับสั่งซื้อ</button>
+          <button class="btn pri sm" style="flex:0" id="reorderToRecv">ส่งไปหน้ารับเข้า →</button>
+        </div>
+        <div id="reorderOut"></div>
+      </div>
+
+      <!-- receive -->
+      <div id="s-recv" class="hide">
+        <div class="panel">
+          <h3>รับสินค้าเข้าคลัง</h3>
+          <div class="form" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+            <label>เลขที่อ้างอิง (PO / Invoice / DO) <span class="req">*</span><input id="rRef"></label>
+            <label>หมายเหตุ<input id="rNote"></label>
+          </div>
+          <div class="pick">
+            <div class="search" style="min-width:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="rPick" placeholder="พิมพ์ชื่อ/รหัสสินค้าเพื่อเพิ่มรายการรับเข้า"></div>
+            <div class="dd" id="rDD"></div>
+          </div>
+          <div id="rLines" style="margin-top:12px"></div>
+          <div class="err" id="rErr"></div>
+          <div class="acts"><button class="btn sec" id="rClear">ล้าง</button><button class="btn pri" id="rSave" style="flex:0">บันทึกรับเข้า</button></div>
+        </div>
+      </div>
+
+      <!-- count -->
+      <div id="s-count" class="hide">
+        <div class="toolbar">
+          <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="cq" type="search" placeholder="ค้นหาสินค้า / ที่เก็บ"></div>
+          <select class="sel" id="cCat"></select>
+          <button class="btn sec sm" id="cSheet">⬇ ใบตรวจนับ CSV</button>
+          <button class="btn pri sm" style="flex:0" id="cSave" disabled>บันทึกผลตรวจนับ</button>
+        </div>
+        <div class="count" id="cInfo">กรอกเฉพาะรายการที่นับแล้ว · ช่องว่าง = ไม่ปรับยอด · ระบบจะบันทึกส่วนต่างเป็นรายการ ADJ</div>
+        <div class="tbl-wrap"><table class="t" id="countTbl"></table></div>
+      </div>
+
+      <!-- txns -->
+      <div id="s-txn" class="hide">
+        <div class="toolbar">
+          <input type="month" class="sel" id="tFrom"><span>ถึง</span><input type="month" class="sel" id="tTo">
+          <select class="sel" id="tType"><option value="">ทุกประเภท</option><option value="IN">รับเข้า (IN)</option><option value="OUT">จ่ายออก (OUT)</option><option value="ADJ">ปรับยอด (ADJ)</option></select>
+          <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="tq" type="search" placeholder="ค้นหา สินค้า / เลขอ้างอิง / แผนก"></div>
+          <button class="btn sec sm" id="tLoad">↻ โหลด</button>
+          <button class="btn sec sm" id="expTxn">⬇ CSV</button>
+        </div>
+        <div class="tbl-wrap"><table class="t" id="txnTbl"></table></div>
+      </div>
+
+      <!-- report -->
+      <div id="s-rep" class="hide">
+        <div class="toolbar">
+          <input type="month" class="sel" id="pFrom"><span>ถึง</span><input type="month" class="sel" id="pTo">
+          <button class="btn sec sm" id="pLoad">↻ สร้างรายงาน</button>
+          <button class="btn sec sm" id="expRep">⬇ CSV ตามแผนก</button>
+        </div>
+        <div class="stats" id="repStats"></div>
+        <div class="grid2">
+          <div class="panel"><h3>มูลค่าการเบิกตามแผนก (รวม VAT)</h3><div class="bars" id="repDept"></div></div>
+          <div class="panel"><h3>มูลค่าการเบิกรายเดือน</h3><div class="bars" id="repMonth"></div></div>
+        </div>
+        <div class="panel"><h3>สินค้าที่เบิกมากที่สุด (Top 15 ตามมูลค่า)</h3><div id="repTop"></div></div>
+        <div class="panel"><h3>แผนก × สินค้า</h3><div id="repDeptItems"></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- CART DRAWER -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="ตะกร้า">
+  <div class="dh"><h2>ตะกร้าขอเบิก</h2><button class="x" data-close>×</button></div>
+  <div class="db">
+    <div id="lines"></div>
+    <div class="tot" id="tot"></div>
+    <form id="reqForm" class="form" autocomplete="on">
+      <label>ชื่อ-นามสกุลผู้ขอ <span class="req">*</span><input name="name" required></label>
+      <label>รหัสพนักงาน <span class="req">*</span><input name="empId" required></label>
+      <label>แผนก / ฝ่าย <span class="req">*</span><input name="dept" list="deptList" required></label>
+      <label>Cost center<input name="cc"></label>
+      <label>วันที่ต้องการใช้<input name="need" type="date"></label>
+      <label>เบอร์ติดต่อ<input name="tel"></label>
+      <label class="full">วัตถุประสงค์ / หมายเหตุ<textarea name="purpose" rows="2"></textarea></label>
+      <datalist id="deptList"></datalist>
+    </form>
+    <div class="err" id="formErr"></div>
+  </div>
+  <div class="df">
+    <button class="btn sec" id="clearCart">ล้างตะกร้า</button>
+    <button class="btn pri" id="submit">ส่งคำขอเบิก</button>
+  </div>
+</aside>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ ตั้งค่า: วาง URL ของ Apps Script Web App ตรงนี้ ============
+   ถ้าเว้นว่างไว้ ระบบจะทำงานใน "โหมดทดลอง" (เก็บข้อมูลในเบราว์เซอร์นี้เท่านั้น, PIN = 1234) */
+const API_URL = 'https://script.google.com/macros/s/AKfycbwWZmkCcxCOUyOSFkcObcDsh4dSLvpbWoMbsPRDV-rIt_MPFWVLT6RWV_uup9zUOX95qA/exec';
+</script>
+<script>
+/* ===== Stationery Request & Stock — core logic (shared by Apps Script and the page's demo mode) ===== */
+var SR_SCHEMA = {
+  Items:    ['code','th','en','cn','unit','cat','priceEx','priceInc','supplier','onHand','min','max','location','active'],
+  Requests: ['id','at','empId','name','dept','cc','tel','need','purpose','status','totalInc','note','actionBy','actionAt','issuedAt'],
+  ReqLines: ['reqId','code','th','en','unit','qty','priceInc','supplier','issuedQty'],
+  Txns:     ['id','at','type','code','th','qty','balance','ref','dept','by','note','priceInc']
+};
+var SR_PUBLIC = { init:1, submit:1, myRequests:1, cancel:1, checkPin:1 };
+
+function srCore(store) {
+  function num(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+  function str(v) { return v == null ? '' : String(v).trim(); }
+  function now() { return new Date().toISOString(); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function bkk(d) { return new Date(d.getTime() + 7 * 3600 * 1000); }  // Asia/Bangkok, for ids
+  function newId(prefix) {
+    var d = bkk(new Date());
+    return prefix + String(d.getUTCFullYear()).slice(2) + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + '-' +
+      pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + Math.random().toString(36).slice(2, 4).toUpperCase();
+  }
+  function fail(msg) { throw new Error(msg); }
+  function itemMap() { var m = {}; store.all('Items').forEach(function (r) { m[r.code] = r; }); return m; }
+  function linesOf(ids) {
+    var set = {}; ids.forEach(function (i) { set[i] = []; });
+    store.all('ReqLines').forEach(function (l) { if (set[l.reqId]) set[l.reqId].push(clean(l)); });
+    return set;
+  }
+  function clean(r) { var o = {}; for (var k in r) if (k !== '_row') o[k] = r[k]; return o; }
+  function withLines(reqs) {
+    var L = linesOf(reqs.map(function (r) { return r.id; }));
+    return reqs.map(function (r) { var o = clean(r); o.lines = L[r.id] || []; return o; });
+  }
+  function findReq(id) {
+    var r = store.all('Requests').filter(function (x) { return x.id === id; })[0];
+    if (!r) fail('ไม่พบคำขอ ' + id);
+    return r;
+  }
+  function addTxn(items, type, code, qty, ref, dept, by, note) {
+    var it = items[code]; if (!it) fail('ไม่พบรหัสสินค้า ' + code);
+    var bal = num(it.onHand) + qty;
+    store.update('Items', it, { onHand: bal });
+    it.onHand = bal;
+    return { id: newId('T'), at: now(), type: type, code: code, th: it.th || it.en, qty: qty, balance: bal,
+             ref: ref || '', dept: dept || '', by: by || '', note: note || '', priceInc: num(it.priceInc) };
+  }
+
+  var H = {
+    checkPin: function () { return { ok: true }; },
+
+    init: function () {
+      var items = store.all('Items').map(function (r) {
+        return { code: r.code, onHand: num(r.onHand), min: num(r.min), max: num(r.max), location: str(r.location),
+                 active: !(r.active === false || str(r.active).toUpperCase() === 'FALSE'),
+                 priceEx: num(r.priceEx), priceInc: num(r.priceInc), th: str(r.th), en: str(r.en), unit: str(r.unit), supplier: str(r.supplier) };
+      });
+      var depts = {}; store.all('Requests').forEach(function (r) { if (r.dept) depts[r.dept] = 1; });
+      return { items: items, depts: Object.keys(depts).sort(), seeded: items.length > 0 };
+    },
+
+    submit: function (p) {
+      var name = str(p.name), empId = str(p.empId), dept = str(p.dept);
+      if (!name || !empId || !dept) fail('กรุณากรอก ชื่อ รหัสพนักงาน และแผนก');
+      var items = itemMap(), lines = [], total = 0, id = newId('SR');
+      (p.lines || []).forEach(function (l) {
+        var it = items[l.code], q = Math.floor(num(l.qty));
+        if (!it || q <= 0) return;
+        lines.push({ reqId: id, code: it.code, th: it.th, en: it.en, unit: it.unit, qty: q, priceInc: num(it.priceInc), supplier: it.supplier, issuedQty: '' });
+        total += q * num(it.priceInc);
+      });
+      if (!lines.length) fail('ไม่มีรายการสินค้าในคำขอ');
+      store.append('Requests', [{ id: id, at: now(), empId: empId, name: name, dept: dept, cc: str(p.cc), tel: str(p.tel), need: str(p.need),
+        purpose: str(p.purpose), status: 'pending', totalInc: Math.round(total * 100) / 100, note: '', actionBy: '', actionAt: '', issuedAt: '' }]);
+      store.append('ReqLines', lines);
+      return { id: id, totalInc: Math.round(total * 100) / 100 };
+    },
+
+    myRequests: function (p) {
+      var emp = str(p.empId); if (!emp) return { requests: [] };
+      var reqs = store.all('Requests').filter(function (r) { return str(r.empId).toLowerCase() === emp.toLowerCase(); });
+      reqs.sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); });
+      return { requests: withLines(reqs.slice(0, 100)) };
+    },
+
+    cancel: function (p) {
+      var r = findReq(str(p.id));
+      if (str(r.empId).toLowerCase() !== str(p.empId).toLowerCase()) fail('รหัสพนักงานไม่ตรงกับคำขอ');
+      if (r.status !== 'pending') fail('ยกเลิกได้เฉพาะคำขอที่รออนุมัติ');
+      store.update('Requests', r, { status: 'cancelled', actionAt: now(), actionBy: r.name });
+      return { ok: true };
+    },
+
+    /* ---------- admin ---------- */
+    seed: function (p) {
+      if (store.all('Items').length) fail('ชีต Items มีข้อมูลอยู่แล้ว');
+      var rows = (p.items || []).map(function (x) {
+        return { code: x.code, th: x.th, en: x.en, cn: x.cn, unit: x.unit, cat: x.cat, priceEx: x.ex, priceInc: x.inc, supplier: x.sup,
+                 onHand: 0, min: 0, max: 0, location: '', active: true };
+      });
+      store.append('Items', rows);
+      return { count: rows.length };
+    },
+
+    requests: function (p) {
+      var st = str(p.status), m = str(p.month);
+      var reqs = store.all('Requests').filter(function (r) {
+        return (!st || r.status === st) && (!m || String(r.at).slice(0, 7) === m);
+      });
+      reqs.sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); });
+      var counts = {}; store.all('Requests').forEach(function (r) { counts[r.status] = (counts[r.status] || 0) + 1; });
+      return { requests: withLines(reqs.slice(0, 500)), counts: counts };
+    },
+
+    setStatus: function (p) {
+      var r = findReq(str(p.id)), s = str(p.status);
+      if (['approved', 'rejected', 'pending'].indexOf(s) < 0) fail('สถานะไม่ถูกต้อง');
+      if (r.status === 'issued' || r.status === 'cancelled') fail('คำขอนี้ ' + r.status + ' แล้ว เปลี่ยนสถานะไม่ได้');
+      store.update('Requests', r, { status: s, note: str(p.note), actionBy: str(p.by), actionAt: now() });
+      return { ok: true };
+    },
+
+    issue: function (p) {
+      var r = findReq(str(p.id));
+      if (r.status !== 'approved') fail('จ่ายของได้เฉพาะคำขอที่อนุมัติแล้ว');
+      var items = itemMap(), want = {};
+      (p.lines || []).forEach(function (l) { want[l.code] = Math.max(0, Math.floor(num(l.qty))); });
+      var lines = store.all('ReqLines').filter(function (l) { return l.reqId === r.id; });
+      lines.forEach(function (l) {
+        var q = want[l.code] != null ? want[l.code] : num(l.qty);
+        if (q > num(items[l.code] && items[l.code].onHand)) fail('Stock ไม่พอ: ' + (l.th || l.code) + ' (คงเหลือ ' + num(items[l.code] && items[l.code].onHand) + ')');
+      });
+      var tx = [];
+      lines.forEach(function (l) {
+        var q = want[l.code] != null ? want[l.code] : num(l.qty);
+        store.update('ReqLines', l, { issuedQty: q });
+        if (q > 0) tx.push(addTxn(items, 'OUT', l.code, -q, r.id, r.dept, str(p.by), r.name));
+      });
+      if (tx.length) store.append('Txns', tx);
+      store.update('Requests', r, { status: 'issued', issuedAt: now(), actionBy: str(p.by), actionAt: now(), note: str(p.note) || r.note });
+      return { ok: true, txns: tx.length };
+    },
+
+    receive: function (p) {
+      var items = itemMap(), tx = [];
+      (p.lines || []).forEach(function (l) {
+        var q = Math.floor(num(l.qty)); if (q <= 0) return;
+        tx.push(addTxn(items, 'IN', l.code, q, str(p.ref), '', str(p.by), str(p.note)));
+      });
+      if (!tx.length) fail('ไม่มีรายการรับเข้า');
+      store.append('Txns', tx);
+      return { ok: true, txns: tx.length };
+    },
+
+    count: function (p) {
+      var items = itemMap(), tx = [], ref = newId('CNT');
+      (p.counts || []).forEach(function (c) {
+        if (c.counted === '' || c.counted == null) return;
+        var it = items[c.code]; if (!it) return;
+        var sys = num(it.onHand), cnt = Math.floor(num(c.counted)), diff = cnt - sys;
+        if (diff !== 0) tx.push(addTxn(items, 'ADJ', c.code, diff, ref, '', str(p.by), 'ตรวจนับ: ระบบ ' + sys + ' → นับได้ ' + cnt));
+      });
+      if (tx.length) store.append('Txns', tx);
+      return { ok: true, ref: ref, adjusted: tx.length };
+    },
+
+    setItems: function (p) {
+      var items = itemMap(), n = 0;
+      (p.changes || []).forEach(function (c) {
+        var it = items[c.code]; if (!it) return;
+        var patch = {};
+        ['min', 'max'].forEach(function (k) { if (c[k] !== undefined && c[k] !== '') patch[k] = Math.max(0, Math.floor(num(c[k]))); });
+        if (c.location !== undefined) patch.location = str(c.location);
+        if (c.active !== undefined) patch.active = !!c.active;
+        store.update('Items', it, patch); n++;
+      });
+      return { ok: true, updated: n };
+    },
+
+    txns: function (p) {
+      var from = str(p.from), to = str(p.to), type = str(p.type), code = str(p.code);
+      var t = store.all('Txns').filter(function (x) {
+        var m = String(x.at).slice(0, 7);
+        return (!from || m >= from) && (!to || m <= to) && (!type || x.type === type) && (!code || x.code === code);
+      }).map(clean);
+      t.sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); });
+      return { txns: t.slice(0, 3000) };
+    }
+  };
+
+  return function handle(action, payload) {
+    if (!H[action]) fail('Unknown action: ' + action);
+    payload = payload || {};
+    if (!SR_PUBLIC[action] || action === 'checkPin') {
+      if (str(payload.pin) !== String(store.pin())) fail('PIN ไม่ถูกต้อง');
+    }
+    return H[action](payload);
+  };
+}
+
+</script>
+<script id="data" type="application/json">[{"code":"O1-07010009","en":"Waste Bin","cn":"垃圾桶","th":"ถังขยะ","unit":"PCS","ex":75.0,"inc":80.25,"spec":"Brand: Mayflower\nMayflower Metal Mesh Trash Can, 9L, Direct Disposal, Eco-friendly, Wire Mesh,\nfor Office, Home, Living Room, Dormitory, Kitchen, Bathroom, and Wastebasket\nUnit / Packaging: PCS","sup":"Jingdong","cat":"tool"},{"code":"O1-07010010","en":"Cardboard Document Storage Box","cn":"纸质文件收纳箱","th":"กล่องกระดาษเก็บเอกสาร","unit":"PCS","ex":54.0,"inc":57.78,"spec":"Brand: ONE\nONE กล่องเก็บเอกสารพับได้ฝาในตัว ลายก้อนเมฆ\nกล่องกระดาษ เกรด A แข็งแรง ทนต่อการใช้งาน น้ำหนักกระดาษ 375 แกรม\nพิมพ์ลายปราณีต สวยงาม น่าใช้งาน\nใช้งานง่าย พับได้ประหยัดพื้นที่ในการจัดเก็บ\nใช้สำหรับจัดเก็บเอกสาร อุปกรณ์เครื่องใช้สิ่งของต่างๆ\nขนาดสินค้า (กว้าง x ยาว x สูง) 41.3 x 34.2 x 29.5 ซม.\nลายก้อนเมฆ\nจำนวน 1 ใบ\nUnit / Packaging: Piece","sup":"Officemate","cat":"file"},{"code":"O1-07010011","en":"3-Tier Plastic Document Tray","cn":"三层塑料文件盘","th":"ถาดเอกสารพลาสติก 3 ชั้น L-3","unit":"PCS","ex":240.0,"inc":256.8,"spec":"Brand: ออร์ก้า\nถาดเอกสารพลาสติก 3 ชั้น L-3\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"file"},{"code":"O1-07010012","en":"3-Tier Plastic Document Tray","cn":"三层塑料文件盘","th":"ถาดเอกสารพลาสติก 3 ชั้น S3-N 3","unit":"PCS","ex":300.0,"inc":321.0,"spec":"Brand: ถาดเอกสารพลาสติก ออร์ก้า S3-N 3 ชั้น สีใส\nขนาด 26.5 x 41.5 x 25.5 ซม.\nชนิด 3 ชั้น\nขนาด 26.5 x 41.5 x 25.5 ซม.\nชนิด 3 ชั้น\nจำนวน 1 ชุด\nสีใส","sup":"Officework","cat":"file"},{"code":"O1-07010013","en":"Plastic Document Box","cn":"塑料文件盒","th":"กล่องเอกสารพลาสติก BF-93","unit":"PCS","ex":30.0,"inc":32.1,"spec":"Brand: ONE\nกล่องใส่แม็กกาซีน รุ่น BF-93 สีดำ ขนาด (กว้าง × ยาว × สูง) 24.8 × 29.1 × 8.4 ซม.\nกล่องพลาสติก เนื้อดีมีคุณภาพ แข็งแรง ทนทาน\nมีป้ายสติกเกอร์สำหรับเขียนหัวข้องานหรือเอกสาร ค้นหาได้ง่าย\nสันกล่องเจาะรูกลม เพิ่มความสะดวกในการหยิบ\nเหมาะสำหรับใส่หนังสือหรือเอกสารขนาด A4 และ F4\nจำหน่าย 1 กล่องต่อชิ้น\nUnit / Packaging: Box","sup":"Officemate","cat":"file"},{"code":"O1-07010014","en":"Document File Holder","cn":"文件收纳架","th":"กล่องใส่เอกสาร,ที่ใส่แฟ้มเอกสาร","unit":"PCS","ex":45.0,"inc":48.15,"spec":"Brand: ออร์ก้า\nกล่องใส่เอกสาร,ที่ใส่แฟ้มเอกสาร สีขาว\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"file"},{"code":"O1-07010015","en":"Stainless Steel Cutter","cn":"不锈钢美工刀","th":"คัตเตอร์สเตนเลส 9 มม.","unit":"PCS","ex":7.5,"inc":8.03,"spec":"Brand: ONE\nด้ามสเตนเลส แข็งแรง ทนทาน ไม่เป็นสนิม\nใบมีดผลิตจากสเตนเลส คุณภาพดีทำมุมเฉียง 45 องศา\nระบบเลื่อนล็อก Slide Auto Lock ปลอดภัย ใบมีดไม่เลื่อนกลับขณะใช้งาน ฝาปิดท้าย\nสามารถใช้หักใบมีดได้\nมีคลิปหนีบ สะดวกพกพา\nสำหรับใช้ตัดกระดาษ พลาสติก งานตัดทั่วไปและงานออกแบบ-ประดิษฐ์\nรองรับใบมีดขนาดมาตรฐาน : 9 มม.\nสี : สีเงิน\nขนาด 1x13x0.3 ซม./อัน\nบรรจุ 1 อัน/แพ็ค\nจำนวน 1 แพ็ค\nUnit / Packaging: Pack","sup":"Officemate","cat":"tool"},{"code":"O1-07010016","en":"Stainless Steel Cutter","cn":"不锈钢美工刀","th":"คัตเตอร์สเตนเลส 12 มม","unit":"PCS","ex":15.0,"inc":16.05,"spec":"Brand: ONE\nด้ามสเตนเลส แข็งแรง ทนทาน ไม่เป็นสนิม\nใบมีดผลิตจากสเตนเลส คุณภาพดีทำมุมเฉียง 45 องศา\nระบบเลื่อนล็อก Slide Auto Lock ปลอดภัย ใบมีดไม่เลื่อนกลับขณะใช้งาน\nฝาปิดท้าย สามารถใช้หักใบมีดได้\nมีคลิปหนีบ สะดวกพกพา\nสำหรับใช้ตัดกระดาษ พลาสติก งานตัดทั่วไปและงานออกแบบ-ประดิษฐ์\nรองรับใบมีดขนาดมาตรฐาน : 18 มม.\nสี : สีเงิน\nขนาดสินค้า (กว้าง x ยาว x สูง) : 2 x 16 x 0.6 ซม./อัน\nบรรจุ 1 อัน/แพ็ค\nจำนวน 1 แพ็ค\nUnit / Packaging: Pack","sup":"Officemate","cat":"tool"},{"code":"O1-07010017","en":"Cutter Blade","cn":"美工刀片","th":"ใบมีดคัตเตอร์ 9 มม.","unit":"TUBE","ex":3.0,"inc":3.21,"spec":"Brand: Shark\nใบมีดคัตเตอร์ขนาด 9 มม\nUnit / Packaging: 1 Tube","sup":"Bangplee","cat":"tool"},{"code":"O1-07010018","en":"Cutter Blade","cn":"美工刀片","th":"ใบมีดคัตเตอร์ 12 มม.","unit":"TUBE","ex":5.0,"inc":5.35,"spec":"Brand: Shark\nใบมีดคัตเตอร์ขนาด 18 มม\nUnit / Packaging: 1 Tube","sup":"Bangplee","cat":"tool"},{"code":"O1-07010019","en":"Cutting Mat","cn":"切割垫","th":"แผ่นยางรองตัด A3","unit":"PCS","ex":84.5,"inc":90.42,"spec":"Brand: ONE\nผลิตจากยางคุณภาพดีความหนา 3 มม.\nประสานรอยกรีดมีดคัตเตอร์\nสามารถใช้งานได้ทั้ง 2 ด้าน\nพื้นยางยึดเกาะพื้นผิว ไม่ลื่น หรือเคลื่อนที่ระหว่างใช้งาน\nสำหรับใช้รองเขียน หรือรองกรีดสำหรับงานที่ใช้คัตเตอร์\nขนาด 30x45 ซม. (A3)\nสีเขียว\nUnit / Packaging: Piece","sup":"","cat":"tool"},{"code":"O1-07010020","en":"Cutting Mat","cn":"切割垫","th":"แผ่นยางรองตัด A2","unit":"PCS","ex":190.0,"inc":203.3,"spec":"Brand: เอลเฟ่น\nแผ่นยางรองตัด A2\nUnit / Packaging: 1 Sheet","sup":"Bangplee","cat":"tool"},{"code":"O1-07010021","en":"Cutting Mat","cn":"切割垫","th":"แผ่นยางรองตัด","unit":"PCS","ex":308.0,"inc":329.56,"spec":"Brand: ONE\nผลิตจากยางคุณภาพดีความหนา 3 มม.\nประสานรอยกรีดมีดคัตเตอร์\nสามารถใช้งานได้ทั้ง 2 ด้าน\nพื้นยางยึดเกาะพื้นผิว ไม่ลื่น หรือเคลื่อนที่ระหว่างใช้งาน\nสำหรับใช้รองเขียน หรือรองกรีดสำหรับงานที่ใช้คัตเตอร์\nสี : สีเขียว\nขนาดสินค้า (กว้าง x ยาว) : 60 x 90 ซม. (A1)/แผ่น\nจำนวน 1 แผ่น\nUnit / Packaging: Piece","sup":"Officemate","cat":"tool"},{"code":"O1-07010022","en":"Scissors","cn":"剪刀","th":"กรรไกร 8 นิ้ว","unit":"PCS","ex":17.0,"inc":18.19,"spec":"Brand: ONE\nเกี่ยวกับสินค้า\nใบมีดสเตนเลส ทนทาน มีความคมสูง คุณภาพมาตรฐาน\nด้ามจับพลาสติก แข็งแรง สีสันสวยงาม จับถนัดมือ ใช้งานง่าย\nใช้สำหรับตัดกระดาษ เทป ผ้า หรือวัสดุอื่นๆ ตามความเหมาะสม\nขนาด 8 นิ้ว ตัดง่าย ไม่ต้องออกแรงเยอะ\nสินค้าคุณภาพดีนำเข้าจากประเทศไต้หวัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"tool"},{"code":"O1-07010023","en":"Scissors","cn":"剪刀","th":"กรรไกร 9 นิ้ว","unit":"PCS","ex":48.5,"inc":51.9,"spec":"Brand: Deli\nDeli 100015496 DL-38369 Scissors 230mm 9\"\nUnit / Packaging: PCS","sup":"Jingdong","cat":"tool"},{"code":"O1-07010024","en":"Paper Cutter","cn":"切纸机","th":"เครื่องตัดกระดาษ","unit":"PCS","ex":625.0,"inc":668.75,"spec":"Brand: Deli\nDeli 100003426 DL-8013E Paper Trimmer B4\n15 × 12\"\nUnit / Packaging: PCS","sup":"Jingdong","cat":"tool"},{"code":"O1-07010025","en":"Pencil Sharpener","cn":"卷笔刀","th":"เครื่องเหลาดินสอ","unit":"PCS","ex":120.0,"inc":128.4,"spec":"Brand: นานมี\nเครื่องเหลาดินสอ นานมี NM-22\nUnit / Packaging: 1 PC","sup":"Bangplee","cat":"write"},{"code":"O1-07010026","en":"Plastic Zipper Envelope","cn":"塑料拉链文件袋","th":"ซองซิปพลาสติก ไม่ขยายข้าง","unit":"PCS","ex":14.4,"inc":15.41,"spec":"Brand: Deli\nDeli 100117039 DL-5588-WH Zip Bag A4 (White)\nUnit / Packaging: PCS","sup":"Jingdong","cat":"file"},{"code":"O1-07010027","en":"Expandable Plastic Zipper Envelope","cn":"","th":"可扩展塑料拉链文件袋 / ซองซิป พลาสติก ขยายข้าง","unit":"PCS","ex":32.0,"inc":34.24,"spec":"Brand: ONE\nผลิตจากพลาสติกคุณภาพดี /ขยายข้างได้\nซองซิป เปิด-ปิด ใช้งานง่าย กันน้ำได้\nเหมาะสำหรับใส่เอกสารขนาด A4\nสี : ขาว\nจำนวน 1 ใบ","sup":"Officemate","cat":"file"},{"code":"O1-07010028","en":"Button Document Envelope","cn":"按扣文件袋","th":"แฟ้มกระเป๋าซองกระดุม1เม็ด แนวนอน","unit":"PCS","ex":6.0,"inc":6.42,"spec":"Brand: แฟ้มกระดุมพลาสติก ออร์ก้า A-120 A4 แนวนอน สีขาว\nความหนา 0.16 mc, ขนาด A4\nปิดผนึกแบบติดกระดุม 1 เม็ด\nUnit / Packaging: ราคา / 1 ชิ้น","sup":"Officework","cat":"file"},{"code":"O1-07010029","en":"Expandable String-Tie Plastic Envelope","cn":"","th":"可扩展绑绳塑料文件袋 / ซอง พลาสติกผูกเชือกขยายข้าง","unit":"PCS","ex":9.25,"inc":9.9,"spec":"Brand: แฟ้มซองพลาสติกผูกเชือกขยายข้าง ออร์ก้า A4 ขาวใส\nขนาด 26.5 x 34 ซม., ขนาด A4\nUnit / Packaging: ราคา / 1 ชิ้น","sup":"Officework","cat":"file"},{"code":"O1-07010030","en":"Plastic Document Envelope","cn":"塑料文件袋","th":"แฟ้มซองพลาสติกไม่ขยายข้าง","unit":"PCS","ex":2.25,"inc":2.41,"spec":"Brand: ONE\nผลิตจากพลาสติกคุณภาพดี /ขยายข้างได้\nซองซิป เปิด-ปิด ใช้งานง่าย กันน้ำได้\nเหมาะสำหรับใส่เอกสารขนาด A4\nสี : ขาว\nจำนวน 1 ใบ","sup":"Officemate","cat":"file"},{"code":"O1-07010031","en":"Brown Document Envelope","cn":"牛皮纸文件袋","th":"ซองเอกสารน้ำตาล ไม่ขยายข้าง 9 x 12 3/4 นิ้ว","unit":"PACK","ex":66.0,"inc":70.62,"spec":"Brand: ONE\nผลิตจากกระดาษคราฟท์ KA เนื้อหนา คุณภาพดี\nฝาขนาน ปิดผนึกได้แน่นสนิทเพียงใช้น้ำลูบ\nใช้เยื่อกระดาษรีไซเคิลถึง 70% เป็นมิตรกับสิ่งแวดล้อม\nเหมาะสำหรับบรรจุเอกสารทั่วไป\nชนิด : แถบกาว\nสี : น้ำตาล\nกระดาษหนา : 125 แกรม\nขนาดซอง (กว้าง x ยาว) : 9 x 12 3/4 นิ้ว\nบรรจุ 50 ซอง/แพ็ค, 1 แพ็ค\nUnit / Packaging: Pack","sup":"Officemate","cat":"file"},{"code":"O1-07010032","en":"Brown Document Envelope","cn":"牛皮纸文件袋","th":"ซองเอกสารน้ำตาล ไม่ขยายข้าง 11x17 นิ้ว","unit":"PACK","ex":145.0,"inc":155.15,"spec":"Brand: นก\nซองเอกสารน้ำตาล ไม่ขยายข้าง\n11x17 นิ้ว\nUnit / Packaging: 50 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010033","en":"Expandable Brown Document Envelope","cn":"可扩展牛皮纸文件袋","th":"ซองเอกสารน้ำตาล ขยายข้าง 9x12 3/4 นิ้ว","unit":"PACK","ex":156.0,"inc":166.92,"spec":"Brand: นก\nซองเอกสารน้ำตาล ขยายข้าง\n9x12 3/4 นิ้ว\nUnit / Packaging: 50 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010034","en":"Expandable Brown Document Envelope","cn":"可扩展牛皮纸文件袋","th":"ซองเอกสารน้ำตาล ขยายข้าง 11x17 นิ้ว","unit":"PACK","ex":205.0,"inc":219.35,"spec":"Brand: นก\nซองเอกสารน้ำตาล ขยายข้าง\n11x17 นิ้ว\nUnit / Packaging: 50 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010035","en":"Brown Document Envelope","cn":"牛皮纸文件袋","th":"ซองเอกสารน้ำตาล ไม่ขยายข้าง 6x9 นิ้ว","unit":"PACK","ex":50.0,"inc":53.5,"spec":"Brand: นก\nซองเอกสารน้ำตาล ไม่ขยายข้าง\n6x9 นิ้ว\nUnit / Packaging: 50 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010036","en":"White Window Envelope","cn":"白色开窗信封","th":"ซองจดหมายสีขาว แบบมีหน้าต่าง","unit":"PACK","ex":52.0,"inc":55.64,"spec":"Brand: นก\nซองจดหมายสีขาว แบบมีหน้าต่าง\nUnit / Packaging: 50 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010037","en":"Parallel-Flap Envelope","cn":"平口信封","th":"ซองจดหมายฝาขนาน เบอร์ 9/125 ช่องหน้าต่าง","unit":"PACK","ex":36.0,"inc":38.52,"spec":"Brand: ซองขาวฝาขนาน 555 No.9/125 (50 ซอง) รุ่นซิงค์\nความหนา 100 แกรม, ขนาด 4 1/2 x 9 1/4 นิ้ว\nUnit / Packaging: จำนวน 50 ซอง/แพ็ค","sup":"","cat":"file"},{"code":"O1-07010038","en":"White Envelope","cn":"白色信封","th":"ซองขาว No.C6/125 ปอนด์","unit":"PACK","ex":27.0,"inc":28.89,"spec":"Brand: นก\nซองขาว No.C6/125 ปอนด์สีขาว\nUnit / Packaging: 50 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010039","en":"Hard Plastic Envelope / Card Case Color: Transparent","cn":"硬质塑料文件袋/卡套","th":"ซองพลาสติกแข็งใสหนา รองรับเอกสารขนาด A4 ขนาด 29.7x21","unit":"PCS","ex":10.5,"inc":11.77,"spec":"Brand: ONE\nซองพลาสติกแข็งใสหนา 0.4 มม. กันน้ำ กันฝุ่น ทนทานใช้งานได้นาน\nทนต่อแสง ไม่ขุ่นเหลืองง่าย ไม่เปราะแตกจากการใช้งานทั่วไป\nสอดเอกสารทางด้านยาว เปิด-ปิดสะดวก ใส่เอกสารได้ง่ายรวดเร็ว\nรองรับเอกสารขนาด A4 ขนาด 29.7x21 ซม. ใช้งานสะดวกทุกวัน\nเหมาะสำหรับถนอมเอกสารสำคัญ รายงาน และงานพิมพ์ทุกประเภท\nUnit / Packaging: Piece","sup":"Officemate","cat":"file"},{"code":"O1-07010040","en":"Hard Plastic Envelope / Card Case Color: Transparent","cn":"硬质塑料文件袋/卡套","th":"ซองพลาสติกชนิดแข็ง ขนาด 21.0x14.8 ซม. (A5)","unit":"PCS","ex":6.5,"inc":6.96,"spec":"Brand: ONE\nซองพลาสติกชนิดแข็ง หนา 0.4 มม.\nทนต่อแสงไม่ขุ่นเหลืองง่าย ไม่เปราะง่าย\nสอดเอกสารทางด้านยาว ใส่เอกสารได้ง่าย\nขนาด 21.0x14.8 ซม.(A5)\nสีใส\nUnit / Packaging: Piece","sup":"Officemate","cat":"file"},{"code":"O1-07010041","en":"Hard Plastic Envelope / Card Case Color: Transparent","cn":"硬质塑料文件袋/卡套","th":"ซองพลาสติกชนิดแข็ง ขนาด 420 x 297 มม.(A3)","unit":"PCS","ex":19.0,"inc":20.33,"spec":"Brand: ONE\nซองพลาสติกใสชนิดแข็ง หนา 0.4 มม. คุณภาพดีกันน้ำ กันฝุ่น\nทนทาน ทนต่อแสงไม่ขุ่นเหลืองง่าย ไม่เปราะง่าย\nสอดเอกสารทางด้านยาว ใส่เอกสารได้ง่าย\nเหมาะสำหรับใส่เอกสารขนาด A3\nสี : ใส\nขนาดสินค้า (กว้าง x ยาว): 420 x 297 มม.(A3)/ซอง\nจำนวน 1 ซอง\nหมายเหตุการสั่งซื้อ* * กรณีซื้อเป็นกล่อง สินค้าบรรจุ 20 ซอง/กล่อง","sup":"Officemate","cat":"file"},{"code":"O1-07010042","en":"A4 Wall-Mounted Acrylic Sign Holder (Vertical/Horizontal)","cn":"A4壁挂亚克力标牌架 (竖/横)","th":"A4 ป้ายอะคริลิคติดผนัง แนวตั้ง/แนวนอน","unit":"PCS","ex":195.0,"inc":208.65,"spec":"Brand: ไม่มีแบรนด์\nA4 ป้ายอะคริลิคติดผนัง\nแนวตั้ง/แนวนอน\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"sign"},{"code":"O1-07010043","en":"Green Hanging File Folder F4","cn":"绿色悬挂文件夹 F4","th":"แฟ้มแขวน F4 สีเขียว","unit":"PCS","ex":11.0,"inc":11.77,"spec":"Brand: แฟ้มแขวน ตราช้าง 925 F4 สีเขียว (1x10)\nราคาต่อ 1 ชิ้น แต่รบกวนสั่งทีละ 10 ชิ้น เพราะขายเป็นแพค\nผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม.\nจำนวน 10 เล่ม/แพ็ค\nUnit / Packaging: ผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม.\nจำนวน 10 เล่ม/แพ็ค","sup":"Officework","cat":"file"},{"code":"O1-07010044","en":"Yellow Hanging File Folder F4","cn":"黄色悬挂文件夹 F4","th":"แฟ้มแขวน F4 สีเหลือง","unit":"PCS","ex":11.0,"inc":11.77,"spec":"Brand: แฟ้มแขวน ตราช้าง 925 F4 สีเหลือง (1x10)\nราคาต่อ 1 ชิ้น แต่รบกวนสั่งทีละ 10 ชิ้น เพราะขายเป็นแพค\nผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม.\nจำนวน 10 เล่ม/แพ็ค Unit / Packaging: ผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210\nแกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม.\nจำนวน 10 เล่ม/แพ็ค","sup":"Officework","cat":"file"},{"code":"O1-07010045","en":"Pink Hanging File Folder F4","cn":"粉色悬挂文件夹 F4","th":"แฟ้มแขวน F4 สีชมพู","unit":"PCS","ex":11.0,"inc":11.77,"spec":"Brand: แฟ้มแขวน ตราช้าง 926 F4 สีชมพู (1x10)\nราคาต่อ 1 ชิ้น แต่รบกวนสั่งทีละ 10 ชิ้น เพราะขายเป็นแพค\nผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม.\nจำนวน 10 เล่ม/แพ็ค\nUnit / Packaging: ผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม ขนาดสินค้า\n(กว้าง x ยาว) : 24 x 36.4 ซม. จำนวน 10 เล่ม/แพ็ค","sup":"Officework","cat":"file"},{"code":"O1-07010046","en":"Blue Hanging File Folder F4","cn":"蓝色悬挂文件夹 F4","th":"แฟ้มแขวน F4 สีน้ำเงิน","unit":"PCS","ex":11.0,"inc":11.77,"spec":"Brand: แฟ้มแขวน ตราช้าง 926 F4 สีฟ้า/น้ำเงิน (1x10)\nราคาต่อ 1 ชิ้น แต่รบกวนสั่งทีละ 10 ชิ้น เพราะขายเป็นแพค\nผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม.\nจำนวน 10 เล่ม/แพ็ค\nUnit / Packaging: ผลิตจากกระดาษคราฟท์ใยบริสุทธิ ~ หนา 210 แกรม\nขนาดสินค้า (กว้าง x ยาว) : 24 x 36.4 ซม. จำนวน 10 เล่ม/แพ็ค","sup":"Officework","cat":"file"},{"code":"O1-07010047","en":"Hanging File Frame","cn":"悬挂文件架","th":"โครงเหล็กสำหรับแฟ้มแขวน","unit":"PCS","ex":109.8,"inc":117.49,"spec":"Brand: Robin\n* ผลิตจากเหล็กเส้นเนื้อดีแข็งแรง รองรับน้ำหนักได้ดี\n* จัดเก็บแฟ้มแขวนขนาด F/C ได้ประมาณ 10-15 เล่ม\n* ขนาด 25x39x28.5 ซม.\n* 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"file"},{"code":"O1-07010048","en":"Slide Binder","cn":"抽杆文件夹","th":"แฟ้มโชว์เอกสารสันรูด","unit":"PCS","ex":6.16,"inc":6.59,"spec":"Brand: ONE\nปกและสันรูดพลาสติก คุณภาพดีแข็งแรง ทนทาน\nสันรูดยึดหนีบเอกสารได้แน่น ยืดหยุ่นดีเข้าเล่มง่าย\nปลายสันรูดมุมมน ง่ายและสะดวกในการเข้าเล่มเอกสาร\nเข้าเล่มเอกสารได้มากถึง 25 แผ่น\nสำหรับเข้าเล่มเอกสารหรือรายงานขนาด A4\nสี : คละสีทึบ\nสันหนา : 5 มม.\nขนาดสินค้า (กว้าง x ยาว) : 22 x 31 ซม.\nบรรจุ 12 เล่ม/แพ็ค, 1 แพ็ค\nUnit / Packaging: Pack / หน่วยขายแพ็คละ 12 ซอง เฉลี่ยซองละ 2.25 แต่เวลาเปิดซื้อ\nต้องเปิดหน่วยแพ็คเท่านั้น ราคา 74 Exvat","sup":"Officemate","cat":"file"},{"code":"O1-07010049","en":"Lever Arch File","cn":"杠杆文件夹","th":"แฟ้มสันกว้างก้านยก","unit":"PCS","ex":45.0,"inc":48.15,"spec":"Brand: ตราช้าง\nแฟ้มสันกว้างก้านยก\nA4 สัน 3 นิ้ว\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"file"},{"code":"O1-07010050","en":"11-Hole Sheet Protector","cn":"11孔文件保护袋","th":"ซองถนอมเอกสาร 11 รูขนาด A4","unit":"PACK","ex":9.5,"inc":10.17,"spec":"Brand: ซองอเนกประสงค์ตราช้าง 11 รู 0.05 มม. สีขาว\nพลาสติกหนา 0.05 มม., ขนาด A4\nจำนวน 20 ซอง/แพ็ค\nUnit / Packaging: พลาสติกหนา 0.05 มม., ขนาด A4\nจำนวน 20 ซอง/แพ็ค","sup":"","cat":"file"},{"code":"O1-07010051","en":"11-Hole Sheet Protector","cn":"11孔文件保护袋","th":"ซองถนอมเอกสาร 11 รูขนาด A3","unit":"PACK","ex":105.0,"inc":112.35,"spec":"Brand: ออร์ก้า\nซองถนอมเอกสาร 11 รู A3\nUnit / Packaging: 20 Envelopes/Pack, 1 Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010052","en":"11-Hole Sheet Protector","cn":"11孔文件保护袋","th":"ซองถนอมเอกสาร 11 รูขนาด A3 แนวนอน","unit":"PACK","ex":120.0,"inc":128.4,"spec":"Brand: ซองอเนกประสงค์ตราช้าง 11 รู A3 0.09 มม. (1x10)\nพลาสติกหนา 0.09 มม., ขนาด A3\nจำนวน 10 ซอง/แพ็ค\nUnit / Packaging: พลาสติกหนา 0.09 มม., ขนาด A3\nจำนวน 10 ซอง/แพ็ค","sup":"Officework","cat":"file"},{"code":"O1-07010053","en":"Paper Index Divider","cn":"纸质索引分隔页","th":"อินเด็กซ์กระดาษ 1-5","unit":"PCS","ex":11.5,"inc":12.31,"spec":"Brand: อินเด็กซ์กระดาษการ์ด ใบโพธิ ~ A4 5 หยัก คละสี\nกระดาษการ์ดหนา 230 แกรม., ขนาด A4\nUnit / Packaging: จำนวน 5 แผ่น/ชุด","sup":"Officework","cat":"file"},{"code":"O1-07010054","en":"Paper Index Divider","cn":"纸质索引分隔页","th":"อินเด็กซ์กระดาษ 1-10","unit":"PCS","ex":20.5,"inc":21.94,"spec":"Brand: กราฟฟิค\nอินเด็กซ์กระดาษ A4 1-10\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"file"},{"code":"O1-07010055","en":"Paper Index Divider","cn":"纸质索引分隔页","th":"อินเด็กซ์กระดาษ 1-12","unit":"PCS","ex":21.0,"inc":22.47,"spec":"Brand: ออร์ก้า\nอินเด็กซ์กระดาษ A4 1-12\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"file"},{"code":"O1-07010056","en":"Metal File Fastener","cn":"金属文件夹扣","th":"ลิ้นแฟ้มเหล็ก","unit":"BOX","ex":35.0,"inc":37.45,"spec":"Brand: เบนนอน\nลิ้นแฟ้มเหล็ก\nUnit / Packaging: 50 Sets/Box","sup":"Bangplee","cat":"file"},{"code":"O1-07010057","en":"Signature Book","cn":"签字呈批本","th":"สมุดเสนอเซ็นปกกระดาษ","unit":"PCS","ex":122.0,"inc":130.54,"spec":"Brand: ONE\nปกกระดาษคุณภาพ แข็งแรง ทนทาน\nเนื้อในกระดาษอย่างดีแข็งแรง ไม่เปื่อยยุ่ย\nเหมาะสำหรับใส่เอกสารเพื่อนำเสนอ\nขนาด 26.5 x 37 ซม.\n17 แผ่น/เล่ม (ไม่รวมปก)\nUnit / Packaging: Piece","sup":"Officemate","cat":"note"},{"code":"O1-07010058","en":"Double-Sided Tissue Tape","cn":"双面棉纸胶带","th":"เทปเยื่อกาวสองหน้า 12x10y","unit":"PCS","ex":4.0,"inc":4.28,"spec":"Brand: Gumtree\nเทปเยื่อกาวสองหน้า 12x10y\nแกน 3 นิ้ว\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010059","en":"Double-Sided Tissue Tape","cn":"双面棉纸胶带","th":"เทปเยื่อกาวสองหน้า 18x10y","unit":"PCS","ex":4.75,"inc":5.08,"spec":"Brand: Gumtree\nเทปเยื่อกาวสองหน้า 18x10y\nแกน 3 นิ้ว\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010060","en":"Double-Sided Foam Tape","cn":"双面泡棉胶带","th":"เทปโฟมกาวสองหน้า 24mm*5y*1.5mm","unit":"PCS","ex":27.0,"inc":28.89,"spec":"Brand: Deli\nDeli foam tape JL102 24mm*5y*1.5mm 1 roll/bag White 1 bag\nUnit / Packaging: Roll","sup":"Officemate","cat":"tape"},{"code":"O1-07010061","en":"Double-Sided Tissue Tape","cn":"双面棉纸胶带","th":"เทปเยื่อกาวสองหน้า 6 มม x 20 หลา","unit":"PCS","ex":4.0,"inc":4.28,"spec":"Brand: เทปเยื่อกาว 2 หน้า อาร์มสตรองค์ TP-601WC\nขนาด: 6 มม x 20 หลา\nUnit / Packaging: ขนาด: 6 มม x 20 หลา","sup":"Officework","cat":"tape"},{"code":"O1-07010062","en":"Clear Double-Sided Tape","cn":"透明双面胶带","th":"เทปกาวสองหน้าใส 19 มม. x 4 ม.","unit":"PCS","ex":177.0,"inc":189.39,"spec":"Brand: เทปโฟมใส Scotch No.4010 ขนาด 19 มม. x 4 ม.\nขนาด 19 มม. x 4 ม.\nแกนเทป 1 นิ้ว\nรับน้ำหนักได้ 3.3 กก. ต่อความยาว 1 ม.\nUnit / Packaging: ขนาด 19 มม. x 4 ม.\nแกนเทป 1 นิ้ว\nรับน้ำหนักได้ 3.3 กก. ต่อความยาว 1 ม","sup":"Officework","cat":"tape"},{"code":"O1-07010063","en":"Clear OPP Tape","cn":"透明OPP胶带","th":"เทปกาวเนื้อใส OPP 3/4 x 36y","unit":"PCS","ex":17.0,"inc":18.19,"spec":"Brand: หลุยส์\nเทปใส 3/4 x 36y แกน 3 นิ้ว\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010064","en":"OPP Carton Sealing Tape","cn":"OPP封箱胶带","th":"เทป OPP ปิดกล่อง","unit":"PCS","ex":16.0,"inc":17.12,"spec":"Brand: หลุยส์\nเทป OPP ปิดกล่อง\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010065","en":"OPP Carton Sealing Tape","cn":"OPP封箱胶带","th":"เทป OPP ปิดกล่อง","unit":"PCS","ex":37.0,"inc":39.59,"spec":"Brand: ยูนิเทป\nเทป OPP ปิดกล่อง หน้าเทปกว้าง 3 นิ้ว (48 มม.), ยาx50y : หน้าเทปกว้าง\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010066","en":"OPP Carton Sealing Tape","cn":"OPP封箱胶带","th":"เทป OPP ปิดกล่อง","unit":"PCS","ex":16.0,"inc":17.12,"spec":"Brand: หลุยส์\nเทป OPP ปิดกล่อง\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010067","en":"Masking Tape","cn":"美纹纸胶带","th":"เทปกระดาษกาวย่น 18 มม. x 20 หลา","unit":"PCS","ex":6.5,"inc":6.96,"spec":"Brand: ONE\nเนื้อกระดาษหนา แข็งแรง ติดแน่นสนิท ใช้งานได้หลากหลาย\nลอกออกง่าย ไม่ทิ้งคราบกาวให้เลอะพื้นผิว\nทนความร้อนได้สูงถึง 120°C นาน 1 ชั่วโมง\nเหมาะสำหรับงานพ่นสีงานปะติด หรืองานทั่วไป\nขนาด 18 มม. x 20 หลา ความหนา 133 ไมครอน\nUnit / Packaging: Piece","sup":"Officemate","cat":"tape"},{"code":"O1-07010068","en":"Fragile Printed OPP Tape","cn":"易碎品警示OPP胶带","th":"เทป OPP ข้อความ \"ระวังแตก\" พื้นขาว","unit":"PCS","ex":30.3,"inc":32.42,"spec":"Brand: Armstrong\n8859196129581 OPP carton sealing tape, printed \"Fragile\", white background, red\nprint.\nArmstrong 48mm x 45y","sup":"Jingdong","cat":"tape"},{"code":"O1-07010069","en":"Clear Tape","cn":"透明胶带","th":"เทปใส","unit":"PCS","ex":4.0,"inc":4.28,"spec":"Brand: ONE\nเนื้อฟิล์มหนา แข็งแรง ไม่ขาดง่าย\nสีใส เนื้อเทปใสไม่เหลืองกรอบ\nกาวอะคริลิคเหนียว ติดแน่\nหนา 50 ไมครอน\nแกน 1 นิ้ว\nUnit / Packaging: Piece","sup":"Officemate","cat":"tape"},{"code":"O1-07010070","en":"Magic Tape","cn":"隐形胶带","th":"เมจิก เทป","unit":"PCS","ex":69.0,"inc":73.83,"spec":"Brand: 3 M\nเมจิก เทป\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010071","en":"Glue Stick","cn":"固体胶","th":"กาวแท่ง","unit":"PCS","ex":16.0,"inc":17.12,"spec":"Brand: ONE\nกาวแท่งสูตร PVP ติดแน่น ทาเรียบ ไม่เป็นก้อน อายุการใช้งานยาวนานขึ้น\nปราศจากสารพิษ ไม่มีกลิ่นฉุน ปลอดภัยสำหรับเด็กและผู้ใช้ทุกวัย\nเนื้อกาวสีขาว เห็นรอยทาได้ชัด ป้องกันการทากาวซ้ำซ้อนโดยไม่ตั้งใจ\nเหมาะสำหรับงานติดกระดาษ รูปภาพ และงาน DIY ทั่วไปในชีวิตประจำวัน\nใช้งานสะดวก พกพาง่าย เหมาะกับสำนักงาน โรงเรียน และงานประดิษฐ์","sup":"Officemate","cat":"tape"},{"code":"O1-07010072","en":"Red & White PVC Floor Marking Tape","cn":"红白相间 PVC 地面标识胶带","th":"เทปตีเส้นพื้น PVC สีขาว-แดง","unit":"PCS","ex":47.0,"inc":50.29,"spec":"Brand: HUAIYU\nHUAIYU Warning tape for pregnancy, 48mm*33m*130μm PVC (red),,\nexclusively supplied from Thailand.\nUnit / Packaging: Roll","sup":"Jingdong","cat":"tape"},{"code":"O1-07010073","en":"Yellow & Black PVC Floor Marking Tape","cn":"黄黑相间 PVC 地面标识胶带","th":"เทปตีเส้นพื้น PVC สีเหลือง-ดำ","unit":"PCS","ex":34.25,"inc":36.65,"spec":"Brand: Deli\nDeli 33784 Warning Tape 48mm*33m*130μm (Yellow & Black) Single roll,\nThailand Exclusive\nUnit / Packaging: Roll","sup":"Jingdong","cat":"tape"},{"code":"O1-07010074","en":"Assorted Color PVC Floor Marking Tape","cn":"多色 PVC 地面标识胶带","th":"เทปตีเส้นพื้น PVC คละสี","unit":"PCS","ex":64.0,"inc":68.48,"spec":"Brand: หลุยส์\nเทปตีเส้นพื้น PVC คละสี\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010075","en":"Tape Dispenser 3/4 inch","cn":"胶带切割器 3/4英寸","th":"แท่นตัดเทป 3/4 นิ้ว","unit":"PCS","ex":30.0,"inc":32.1,"spec":"Brand: ออร์ก้า\nแท่นตัดเทป 3/4 นิ้ว\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tool"},{"code":"O1-07010076","en":"Tape Dispenser 2 inch","cn":"胶带切割器 2英寸","th":"แท่นตัดเทป 2 นิ้ว","unit":"PCS","ex":33.0,"inc":144.45,"spec":"Brand: เทปโฟมใส Scotch No.4010 ขนาด 19 มม. x 4 ม.\nขนาด 19 มม. x 4 ม.\nแกนเทป 1 นิ้ว\nรับน้ำหนักได้ 3.3 กก. ต่อความยาว 1 ม.\nUnit / Packaging: ขนาด 19 มม. x 4 ม.\nแกนเทป 1 นิ้ว\nรับน้ำหนักได้ 3.3 กก. ต่อความยาว 1 ม","sup":"Officework","cat":"tool"},{"code":"O1-07010077","en":"Hot Melt Glue","cn":"热熔胶","th":"กาวร้อน","unit":"PCS","ex":11.0,"inc":11.77,"spec":"Brand: กาวซูเปอร์กลูตราช้าง Sticko 3 กรัม\nขนาด 3 กรัม","sup":"Officework","cat":"tape"},{"code":"O1-07010078","en":"Latex Glue","cn":"白胶","th":"กาวลาเท็กซ์","unit":"PCS","ex":12.0,"inc":12.84,"spec":"Brand: กาวลาเท็กซ์ TOA 4 ออนซ์\nขนาด 4 ออนซ์","sup":"Officework","cat":"tape"},{"code":"O1-07010079","en":"Multipurpose Tool Set","cn":"多功能工具套装","th":"ชุดเครื่องมือช่างอเนกประสงค์ 82 ชิ้น","unit":"SET","ex":1890.0,"inc":2022.3,"spec":"Brand: KingKong\nชุดเครื่องมือช่างอเนกประสงค์ 82 ชิ้น\nUnit / Packaging: 1 SET","sup":"Bangplee","cat":"tool"},{"code":"O1-07010080","en":"Measuring Tape","cn":"卷尺","th":"ตลับเมตร","unit":"PCS","ex":57.0,"inc":60.99,"spec":"Brand: SATA\nSATA (SATA) Kailon Series Steel Measuring Tape 5M x 25MM 91315A\nUnit / Packaging: PCS","sup":"Jingdong","cat":"tool"},{"code":"O1-07010081","en":"Stamp Refill Ink รุ่น AL- 150N สีน้ำเงิน ขนาด:30 มล","cn":"印章补充墨水","th":"หมึกเติมตรายางหมึกในตัวและเติมแท่น สีน้ำเงิน","unit":"PCS","ex":42.0,"inc":44.94,"spec":"Brand: อาร์ทไลน์\nหมึกเติมตรายางหมึกในตัวและเติมแท่น\nUnit / Packaging: 1 Bottle","sup":"Bangplee","cat":"write"},{"code":"O1-07010082","en":"Stamp Refill Ink รุ่น AL- 150N สีดำ ขนาด:30 มล","cn":"印章补充墨水","th":"หมึกเติมตรายางหมึกในตัวและเติมแท่น สีดำ","unit":"PCS","ex":42.0,"inc":44.94,"spec":"Brand: อาร์ทไลน์\nหมึกเติมตรายางหมึกในตัวและเติมแท่น\nUnit / Packaging: 1 Bottle","sup":"Bangplee","cat":"write"},{"code":"O1-07010083","en":"Stamp Refill Ink รุ่น AL- 150N สีแดง ขนาด:30 มล","cn":"印章补充墨水","th":"หมึกเติมตรายางหมึกในตัวและเติมแท่น สีแดง","unit":"PCS","ex":42.0,"inc":44.94,"spec":"Brand: อาร์ทไลน์\nหมึกเติมตรายางหมึกในตัวและเติมแท่น\nUnit / Packaging: 1 Bottle","sup":"Bangplee","cat":"write"},{"code":"O1-07010084","en":"Ink Refill GI-790 BK","cn":"补充墨水 GI-790 BK","th":"หมึกเติม GI-790 BK","unit":"PCS","ex":235.0,"inc":251.45,"spec":"Brand: หมึกอิงค์เจ็ท Canon GI-790BK\nปริมาณการพิมพ์โดยเฉลี่ย 6,000 แผ่น\nจำนวน 1 ขวด/กล่อง\nUnit / Packaging: 1 Bottle","sup":"Officework","cat":"it"},{"code":"O1-07010085","en":"Ink Refill GI-790 C","cn":"补充墨水 GI-790 C","th":"หมึกเติม GI-790 C","unit":"PCS","ex":235.0,"inc":251.45,"spec":"Brand: หมึกอิงค์เจ็ท Canon GI-790C CYAN\nปริมาณการพิมพ์โดยเฉลี่ย 7,000 แผ่น\nจำนวน 1 ขวด/กล่อง\nUnit / Packaging: 1 Bottle","sup":"Officework","cat":"it"},{"code":"O1-07010086","en":"Ink Refill GI-790 M","cn":"补充墨水 GI-790 M","th":"หมึกเติม GI-790 M","unit":"PCS","ex":235.0,"inc":251.45,"spec":"Brand: หมึกอิงค์เจ็ท Canon GI-790M MAGENTA\nปริมาณการพิมพ์โดยเฉลี่ย 7,000 แผ่น\nจำนวน 1 ขวด/กล่อง\nUnit / Packaging: 1 Bottle","sup":"Officework","cat":"it"},{"code":"O1-07010087","en":"GI-790 Yellow Ink Refill","cn":"GI-790 黄色补充墨水","th":"หมึกเติม GI-790 Y","unit":"PCS","ex":235.0,"inc":251.45,"spec":"Brand: หมึกอิงค์เจ็ท Canon GI-790Y YELLOW\nปริมาณการพิมพ์โดยเฉลี่ย 7,000 แผ่น\nจำนวน 1 ขวด/กล่อง Unit / Packaging: 1 Bottle","sup":"Officework","cat":"it"},{"code":"O1-07010088","en":"Travel Adapter","cn":"转换插头","th":"ปลั… กแปลงไฟ","unit":"PCS","ex":58.0,"inc":62.06,"spec":"Brand: โตชิโน่\nปลั… กแปลงไฟ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"it"},{"code":"O1-07010089","en":"Wireless Presenter","cn":"无线演示器","th":"รีโมทพรีเซนไร้สาย","unit":"PCS","ex":313.0,"inc":334.91,"spec":"Brand: Anitech\nพรีเซ็นเตอร์ไร้สาย 2.4GHz ใช้งานสะดวกทุกสถานที่\nระยะใช้งานไร้สาย 5-100 เมตร ควบคุมการนำเสนอได้ไกล\nจุดเลเซอร์สีแดง ระยะเลเซอร์ 100-200 เมตร เห็นชัด\nรองรับระบบ Windows และ Mac OS ใช้งานได้หลายแพลตฟอร์ม\nขนาดกะทัดรัด น้ำหนักเบา ใช้งานสะดวกพกพาง่าย\nUnit / Packaging: Piece","sup":"Officemate","cat":"it"},{"code":"O1-07010090","en":"Power Strip","cn":"插线板","th":"ปลั… กไฟ","unit":"PCS","ex":235.0,"inc":251.45,"spec":"Brand: Deli\n(DELI) Power strip deli-CT464-socket-5m-white 4 Sockets 5M Single control\nUnit / Packaging: PCS","sup":"Jingdong","cat":"it"},{"code":"O1-07010091","en":"HDMI Cable 2 m","cn":"HDMI线 2 米","th":"สาย HDMI ยาว 2 เมตร","unit":"PCS","ex":115.5,"inc":123.59,"spec":"Brand: Luxun\n禄讯，HDMI线材，HDM-2m，单根\nUnit / Packaging: PCS","sup":"Jingdong","cat":"it"},{"code":"O1-07010092","en":"HDMI Cable 5 m","cn":"HDMI线 5 米","th":"สาย HDMI ยาว 5 เมตร","unit":"PCS","ex":178.0,"inc":190.46,"spec":"Brand: Luxun\n禄讯，HDMI线材，HDMI-5m，单根\nUnit / Packaging: PCS","sup":"Jingdong","cat":"it"},{"code":"O1-07010093","en":"HDMI Cable 20 m","cn":"HDMI线 20 米","th":"สาย HDMI ยาว 20 เมตร","unit":"PCS","ex":858.0,"inc":918.06,"spec":"Brand: GLINK GL-201\nสาย HDMI\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"it"},{"code":"O1-07010094","en":"Wireless Mouse","cn":"无线鼠标","th":"เมาส์ไร้สาย","unit":"PCS","ex":400.0,"inc":428.0,"spec":"Brand: Logitech\nLogitech M240-SILENT-MS-GRAPHITE","sup":"Jingdong","cat":"it"},{"code":"O1-07010095","en":"USB Flash Drive","cn":"U盘","th":"แฟลชไดรฟ์ USB","unit":"PCS","ex":339.0,"inc":362.73,"spec":"Brand: Deli\nDeli USB 2.0 Flash Drive LS320-32G (Silver)\nUnit / Packaging: PCS","sup":"Jingdong","cat":"it"},{"code":"O1-07010096","en":"Wireless Keyboard","cn":"无线键盘","th":"คีย์บอร์ดไร้สาย","unit":"PCS","ex":392.0,"inc":419.44,"spec":"Brand: Anitech\n* คีย์เม้าส์ออฟติคอลไร้สาย 2.4G\n* ความละเอียด 100 dpl\n* ตัวรับสัญญาณนาไนเมาส์ในตัว\n* การทำงานของเครื่องรับ 10 เมตร\n* แบตเตอรี่ AA ขนาด 1 ก้อน\n* รับประกัน 2 ปี\nUnit / Packaging: Set","sup":"Officemate","cat":"it"},{"code":"O1-07010097","en":"Rechargeable LED Flashlight","cn":"充电式LED手电筒","th":"ไฟฉาย Led แบบชาร์จ Us b ซูมได้","unit":"PCS","ex":500.0,"inc":535.0,"spec":"Brand: BRIGHTENLUX BT-FL8112\nไฟฉาย Led แบบชาร์จ Usb\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"it"},{"code":"O1-07010098","en":"4-in-1 Travel Adapter","cn":"四合一转换插头","th":"ปลั… กแปลง 4in1 ขาว โตชิโน DE-204","unit":"PCS","ex":161.0,"inc":172.27,"spec":"Brand: Toshino\n* ปลั… กแปลงนานาชาติ 4 in 1\n* วัสดุผลิตปลั… กทำจากวัสดุไม่ลุกลามไฟ\n* ป้องกันไฟกระชากด้วย Surge Protection\n* ป้องกันไฟเกินอัตโนมัติ\n* สามารถใช้ได้ทั้งปลั… กกลมและปลั… กแบน (2 ขาและ 3 ขา)\n* มีสัญญาณไฟบอกสถานะการทำงาน\n* มีม่านนิรภัยป้องกันไฟดูด\n* เหมาะสำหรับผู้ที่เดินทาง พกพาสะดวก มีน้ำหนักเบา\n* ขนาด 11x17x3.5 ซม.\nUnit / Packaging: Piece","sup":"Officemate","cat":"it"},{"code":"O1-07010099","en":"Holographic PP Sticker Paper","cn":"全息PP贴纸","th":"กระดาษสติ …กเกอร์ PP โฮโลแกรม","unit":"ROLL","ex":240.0,"inc":256.8,"spec":"Brand: Free Manufacturing\nFree Manufacturing / PP Synthetic Paper Label Paper / 60*40*1000 Sheets / Single\nRow / Single Roll\nUnit / Packaging: Roll","sup":"Jingdong","cat":"paper"},{"code":"O1-07010100","en":"Multipurpose Sticker Label","cn":"多用途标签贴","th":"ป้ายสติกเกอร์อเนกประสงค์ 13*38mm","unit":"PACK","ex":23.4,"inc":25.04,"spec":"Brand: Free Manufacturing\nCustom-made / 13*38mm / 15 sheets/pack\nUnit / Packaging: Pack","sup":"Jingdong","cat":"paper"},{"code":"O1-07010101","en":"Multipurpose Sticker Label","cn":"多用途标签贴","th":"ป้ายสติกเกอร์อเนกประสงค์ 19*50mm","unit":"PACK","ex":23.4,"inc":25.04,"spec":"Brand: Free Manufacturing\nCustom-made / 19*50mm / 15 sheets/pack\nUnit / Packaging: Pack","sup":"Jingdong","cat":"paper"},{"code":"O1-07010102","en":"Laminator A4 A3 SKU: 888257600677","cn":"得力塑封机 A4 A3 SKU: 888257600677","th":"เครื่องเคลือบบัตร A4 A3 SKU: 888257600677","unit":"PCS","ex":363.0,"inc":388.41,"spec":"Brand: Neo\nเครื่องเคลือบเอกสารรองรับขนาด A3 ใช้งานได้หลากหลาย\nเคลือบได้ทั้งแบบร้อนและเย็น ปกป้องเอกสารยืดหยุ่น\nความเร็วเคลือบ 280 มม./นาทีงานเสร็จไว ทันใจ\nวัสดุพลาสติก ABS ทนทาน ไม่ลามไฟ ปลอดภัยสูง\nรับประกันสินค้า 1 ปีมั่นใจในคุณภาพและการใช้งาน\nUnit / Packaging: Piece","sup":"Officemate","cat":"it"},{"code":"O1-07010103","en":"Self-Inking Stamp CANCELLED","cn":"回墨印章 CANCELLED","th":"ตรายางหมึกในตัว CANCELLED","unit":"PCS","ex":67.5,"inc":72.23,"spec":"Brand: ONE\nแท่นพลาสติกคุณภาพดีแข็งแรง คงทน จับถนัด กระชับมือ * ตรายางหมึกในตัว\nประทับได้ทันทีต่อเนื่อง สมํ่าเสมอ คมชัด * ฝาครอบในตัว จัดเก็บได้ง่าย สะอาด ไม่\nเลอะเทอะ เมื่อไม่ใช้งาน * เหมาะสำหรับประทับตราบนเอกสารทั่วไป * ใช้ร่วมกับ\nหมึกเติมตรายางในตัวรุ่นทั่วไป * ชนิด : เติมหมึกได้ * สีหมึก : แดง * รูปแบบ : อักษร\nภาษาอังกฤษ \"CANCELLED\" * ขนาดแสดงผล (กว้าง x สูง) : 4 x 1.20 ซม. * ขนาด\nสินค้า (กว้าง x ลึก x สูง) : 6 x 2.6 x 6.5 ซม./อัน * จำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010104","en":"Self-Inking Stamp","cn":"回墨印章","th":"ตรายางหมึกในตัวข้อความ CONFIDENTIAL","unit":"PCS","ex":86.0,"inc":92.02,"spec":"Brand: Sandy\nตรายางหมึกในตัวข้อความ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010105","en":"Self-Inking Stamp","cn":"回墨印章","th":"ตรายางหมึกในตัวข้อความ สำนักงานใหญ่","unit":"PCS","ex":422.5,"inc":452.08,"spec":"Brand: Free Manufacturing\nSelf-inking rubber stamp with the text \"Head Office\" in red.\nUnit / Packaging: PCS","sup":"Jingdong","cat":"write"},{"code":"O1-07010106","en":"Business Card Book","cn":"名片册","th":"สมุดเก็บนามบัตร สามารถเก็บได้ 36 ใบ","unit":"PCS","ex":55.0,"inc":58.85,"spec":"Brand: e-file 101\nสมุดเก็บนามบัตร สามารถเก็บได้ 36 ใบ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"note"},{"code":"O1-07010107","en":"Double-Sided Mobile Whiteboard","cn":"双面移动白板","th":"กระดานไวท์บอร์ด ขาตั้งล้อเลื่อน 2 หน้า","unit":"PCS","ex":2000.0,"inc":2140.0,"spec":"Brand: Deli\ndeli Whiteboard 33622 H型升降双面白板120*90cm\nUnit / Packaging: PCS","sup":"Jingdong","cat":"sign"},{"code":"O1-07010108","en":"Paper Punch (DP-600)","cn":"打孔机 (DP-600)","th":"เครื่องเจาะกระดาษ(DP-600)","unit":"PCS","ex":120.0,"inc":128.4,"spec":"Brand: ตราช้าง\nเครื่องเจาะกระดาษ(DP-600)\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tool"},{"code":"O1-07010109","en":"Paper Punch (DP-800)","cn":"打孔机 (DP-800)","th":"เครื่องเจาะกระดาษ(DP-800)","unit":"PCS","ex":1180.0,"inc":1262.6,"spec":"Brand: เครื่องเจาะกระดาษ ตราช้าง DP-800\nขนาด 12.2 x 20.2 x 18.7 ซม.\nเจาะกระดาษได้ 65 แผ่น\nUnit / Packaging: 1 Pc","sup":"Officework","cat":"tool"},{"code":"O1-07010110","en":"Round Paper Clips (Size 32 mm)","cn":"圆形回形针，尺寸：32毫米","th":"ลวดเสียบกระดาษ ชนิดกลม ขนาด: 32 มม","unit":"PCS","ex":25.0,"inc":26.75,"spec":"Brand: Deli\nDeli 0018 paperclips (100 pieces/small box 5small box/big box), Order by box.\nThailand exclusive.\nUnit / Packaging: Big Box\n(100 pieces/small box 5small box/big box),","sup":"Jingdong","cat":"tool"},{"code":"O1-07010111","en":"Round Paper Clips (Size 32 mm)","cn":"圆形回形针，尺寸：32毫米","th":"ลวดเสียบกระดาษ ชนิดกลม ขนาด: 32 มม","unit":"BOX","ex":4.5,"inc":4.82,"spec":"Brand: เอลเฟ่น\nลวดเสียบกระดาษ ชนิดกลม ขนาด: 32 มม\nUnit / Packaging: 50 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010112","en":"Round Paper Clips (Size 50 mm)","cn":"圆形回形针，尺寸：50毫米","th":"ลวดเสียบกระดาษ ชนิดกลม ขนาด: 50 มม (กล่อ ง)","unit":"BOX","ex":8.25,"inc":8.83,"spec":"Brand: ลวดเสียบกระดาษ ตราม้า No.00 ชนิดกลม\nขนาด 50 มม. จำนวน 25 ตัว/กล่อง","sup":"Officework","cat":"tool"},{"code":"O1-07010113","en":"Round Paper Clips (Size 50 mm)","cn":"圆形回形针，尺寸：50毫米","th":"ลวดเสียบกระดาษ ชนิดกลม ขนาด: 50 มม (กระปุก)","unit":"BOX","ex":30.5,"inc":32.64,"spec":"Brand: M&G\nM&G. M&G ABS916DS 50mm paperclip boxed -100PCS\nUnit / Packaging: Box (100pcs/box)","sup":"Jingdong","cat":"tool"},{"code":"O1-07010114","en":"Magnetic Paper Clip Holder","cn":"磁性回形针盒","th":"กล่องใส่ลวดเสียบชนิดแม่เหล็ก 4.5 x 5.5 x 7.2 ซม.","unit":"PCS","ex":35.0,"inc":37.45,"spec":"Brand: กล่องใส่ลวดเสียบ เบนน่อน ZH102\nขนาด 4.5 x 5.5 x 7.2 ซม.","sup":"Officework","cat":"tool"},{"code":"O1-07010115","en":"Plastic Eyelet","cn":"塑料鸡眼扣","th":"ตาไก่พลาสติก","unit":"BOX","ex":14.0,"inc":14.98,"spec":"Brand: Comix\nตาไก่พลาสติก\nUnit / Packaging: 500 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010116","en":"Brass Eyelet Punch Pliers","cn":"黄铜鸡眼打孔钳","th":"คีมเจาะ/ตอกตาไก่ทองเหลือง","unit":"PCS","ex":240.0,"inc":256.8,"spec":"Brand: Sanko SK9717\nตอกตาไก่ทองเหลือง\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tool"},{"code":"O1-07010117","en":"Brass Eyelet","cn":"黄铜鸡眼扣","th":"ตาไก่ทองเหลือง","unit":"BOX","ex":18.0,"inc":19.26,"spec":"Brand: Sanko\nผลิตจากโลหะเคลือบทองเหลืองคุณภาพดีแข็งแรง ทนทาน\nใช้งานร่วมกับเครื่องเจาะตาไก่ Sanko รุ่น SK-9717\nขนาดรูตาไก่ (เส้นผ่านศูนย์กลาง) : 5 มม./ตัว\nบรรจุ 100 ตัว/กล่อง, 1 กล่อง\nUnit / Packaging: Box","sup":"Officemate","cat":"tool"},{"code":"O1-07010118","en":"Brass Eyelet","cn":"黄铜鸡眼扣","th":"ตาไก่ทองเหลือง","unit":"BOX","ex":68.0,"inc":72.76,"spec":"Brand: SANKO\nBrass eyelets (100 pieces/box) Eyelet hole size (diameter): 5 mm. Sanko model SK-\n9717\nUnit / Packaging: BOX","sup":"Jingdong","cat":"tool"},{"code":"O1-07010119","en":"Stamp Pad","cn":"印台","th":"แท่นประทับ สีแดง","unit":"PCS","ex":24.0,"inc":25.68,"spec":"Brand: ตราม้า\nแท่นประทับ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010120","en":"Stamp Pad","cn":"印台","th":"แท่นประทับ สีนำเงิน","unit":"PCS","ex":24.0,"inc":25.68,"spec":"Brand: ตราม้า\nแท่นประทับ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010121","en":"A5 Vertical Desktop Sign Holder","cn":"A5竖式桌面标牌架","th":"แท่นป้ายตั้งโต๊ะแนวตั้ง A5","unit":"PCS","ex":100.0,"inc":107.0,"spec":"Brand: กรอบ T-Stand JW VTS-A5 แนวตั้ง\nขนาดสินค้า 15 x 7.4 x 21.7 ซม รองรับเอกสารขนาด A5\nUnit / Packaging: 1 EA","sup":"Officework","cat":"sign"},{"code":"O1-07010122","en":"Double-Sided Sign Holder","cn":"双面标牌架","th":"แท่นเสียบ ป้ายชื่อสองหน้า 12.5x17.5 ซม.","unit":"PCS","ex":33.5,"inc":35.84,"spec":"Brand: ONE\nป้ายอะคริลิกใสทรง T เนื้อหนา 2 มม. แข็งแรงทนทาน ใช้งานได้ยาวนาน\nรองรับเอกสารขนาด 12.5x17.5 ซม. เปลี่ยนป้ายได้ง่ายไม่ต้องใช้เครื่องมือ\nดีไซน์แนวตั้ง วางบนโต๊ะได้มั่นคง ดึงดูดสายตาได้ดีในทุกพื้นที่\nเหมาะสำหรับเมนูอาหาร โบรชัวร์รูปภาพ และป้ายข้อความประชาสัมพันธ์\nอเนกประสงค์ใช้ได้ทั้งร้านอาหาร โรงแรม สำนักงาน และงานนิทรรศการ\nUnit / Packaging: Piece","sup":"Officemate","cat":"sign"},{"code":"O1-07010123","en":"Whiteboard Cleaner","cn":"白板清洁剂","th":"น้ำยาเช็ดกระดานไวท์บอร์ด 200 มล.","unit":"PCS","ex":85.0,"inc":90.95,"spec":"Brand: น้ำยาทำความสะอาดไวท์บอร์ด TEX 949 200 มล.\nปริมาณ 200 มล.","sup":"Officework","cat":"sign"},{"code":"O1-07010124","en":"Steel Ruler","cn":"钢尺","th":"ไม้บรรทัดเหล็ก 12นิ้ว","unit":"PCS","ex":10.7,"inc":11.45,"spec":"Brand: ONE\nไม้บรรทัดสเตนเลส หน่วยวัดมาตรฐานทั้งเซนติเมตรและนิ้ว\nวัดขนาดความกว้าง ยาว สูง ของชิ้นงานได้อย่างแม่นยำ\nผลิตจากสเตนเลสสตีลคุณภาพสูง แข็งแรง และทนทาน\nสเกลตัวเลขชัดเจน อ่านค่าได้เที่ยงตรง\nด้านหลังมีมาตรวัด Conversion Table ขนาด 24 นิ้ว (600 มม.)\nเหมาะสำหรับวัดระยะหรือขนาดของสิ่งของและอุปกรณ์ต่าง ๆ\nUnit / Packaging: Piece","sup":"Officemate","cat":"tool"},{"code":"O1-07010125","en":"Plastic Ruler","cn":"塑料尺","th":"ไม้บรรทัดพลาสติก 12 นิ้ว","unit":"PCS","ex":2.0,"inc":2.14,"spec":"Brand: ไม้บรรทัดพลาสติกอ่อนใส 12 นิ้ว\nขนาด 12 นิ้ว, แบบอ่อนใส\nUnit / Packaging: 1 Pc","sup":"Officework","cat":"tool"},{"code":"O1-07010126","en":"Business Card Holder","cn":"名片盒","th":"กล่องใส่นามบัตร เก็บนามใบได้ 400 ใบ","unit":"PCS","ex":190.0,"inc":203.3,"spec":"Brand: กล่องใส่นามบัตร อีเกิ้ล 818S\nขนาด 10.8 x 15.9 x 6.7 ซม.\nใส่นามบัตรได้ 400 ใบ","sup":"Officework","cat":"sign"},{"code":"O1-07010127","en":"Calculator DX120-ST","cn":"计算器 DX120-ST","th":"เครื่องคิดเลข DX120-ST","unit":"PCS","ex":360.0,"inc":385.2,"spec":"Brand: คาสิโอ\nเครื่องคิดเลข DX120-ST\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tool"},{"code":"O1-07010128","en":"Correction Tape","cn":"修正带","th":"เทปลบคำผิด","unit":"PCS","ex":18.0,"inc":19.26,"spec":"Brand: เดลี่\nเทปลบคำผิด\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010129","en":"Round Magnet","cn":"圆形磁铁","th":"เม็ดแม่เหล็กกลม","unit":"PACK","ex":24.0,"inc":25.68,"spec":"Brand: Bennon\nเม็ดแม่เหล็กกลม ขนาด:30มม. สีเขียว/เหลือง/แดง/น้ำเงิน\nUnit / Packaging: 1 Pack","sup":"Bangplee","cat":"sign"},{"code":"O1-07010130","en":"Small Round Metal Box","cn":"小圆形铁盒","th":"กล่องเหล็กทรงกลมเล็ก","unit":"PCS","ex":33.0,"inc":35.31,"spec":"Brand: Deli\nDeli 9172 Metal Mesh Pen Holder, Round/Square, Simple Textured Design,\nCreative Desktop Makeup Brush Storage Box/Bubble, Large Capacity,\nMultifunctional, Black\nUnit / Packaging: PCS","sup":"Jingdong","cat":"tool"},{"code":"O1-07010131","en":"Plastic Storage Box with Wheels JCJ 5112","cn":"带轮塑料收纳箱 JCJ 5112","th":"กล่องพลาสติกมีล้อ JCJ 5112","unit":"PCS","ex":170.0,"inc":181.9,"spec":"Brand: กล่องพลาสติกมีล้อ JCJ 5112 จุ 25 ลิตร ขนาด 35.7x48.6x25.7 cm.\nขนาด 35.7 x 48.6 x 25.7 ซม.\nความจุ 25 ลิตร\nUnit / Packaging: PCS","sup":"Officework","cat":"file"},{"code":"O1-07010132","en":"Plastic Storage Box with Wheels JCJ 5113","cn":"带轮塑料收纳箱 JCJ 5113","th":"กล่องพลาสติกมีล้อ JCJ 5113","unit":"PCS","ex":287.0,"inc":307.09,"spec":"Brand: JCJ\nกล่องผลิตจากพลาสติกเนื้อหนา ทรงสี่เหลี่ยม\nมีฝาปิด ตัวกล่องมีที่ล็อคฝา 2 ข้าง\nติดล้อเลื่อน เคลื่อนย้ายสะดวก\nสำหรับจัดเก็บของอเนกประสงค์\nสีขาวขุ่น\nขนาดความจุ 45 ลิตร\nขนาด 42.3x58x32 ซม.\nUnit / Packaging: Box","sup":"Officemate","cat":"file"},{"code":"O1-07010133","en":"Clipboard A4","cn":"写字板 A4","th":"คลิปบอร์ด A4","unit":"PCS","ex":16.0,"inc":17.12,"spec":"Brand: คลิปบอร์ด ออร์ก้า A4 คละสีกลาง\nขนาด A4\nจำนวน 1 อัน\nUnit / Packaging: PCS","sup":"Officework","cat":"file"},{"code":"O1-07010134","en":"Clipboard A5","cn":"写字板 A5","th":"คลิปบอร์ดA5","unit":"PCS","ex":15.0,"inc":16.05,"spec":"Brand: คลิปบอร์ดพลาสติก เล็ก A5 คละสี\nขนาด A5\nUnit / Packaging: PCS","sup":"Officework","cat":"file"},{"code":"O1-07010135","en":"Clipboard F4","cn":"写字板 F4","th":"คลิปบอร์ด F4","unit":"PCS","ex":20.0,"inc":21.4,"spec":"Brand: คลิปบอร์ดพลาสติก ออร์ก้า F4\nขนาด F4\nจำนวน 1 อัน\nUnit / Packaging: PCS","sup":"Officework","cat":"file"},{"code":"O1-07010136","en":"Whiteboard Eraser","cn":"白板擦","th":"แปรงลบกระดานไวท์บอร์ด","unit":"PCS","ex":9.5,"inc":10.17,"spec":"Brand: ไม่มีแบรนด์\nแปรงลบกระดานไวท์บอร์ด\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"sign"},{"code":"O1-07010137","en":"Binder Clip No. 108","cn":"长尾夹 No. 108","th":"คลิปหนีบกระดาษ No. 108","unit":"BOX","ex":27.0,"inc":28.89,"spec":"Brand: Baipo\nNo\nUnit / Packaging: 12 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010138","en":"Binder Clip No. 109","cn":"长尾夹 No. 109","th":"คลิปหนีบกระดาษ No. 109","unit":"BOX","ex":18.0,"inc":19.26,"spec":"Brand: Baipo\nNo\nUnit / Packaging: 12 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010139","en":"Binder Clip No. 110","cn":"长尾夹 No. 110","th":"คลิปหนีบกระดาษ No. 110","unit":"BOX","ex":12.0,"inc":12.84,"spec":"Brand: Baipo\nNo\nUnit / Packaging: 12 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010140","en":"Binder Clip No. 111","cn":"长尾夹 No. 111","th":"คลิปหนีบกระดาษ No. 111","unit":"BOX","ex":8.5,"inc":9.1,"spec":"Brand: Baipo\nNo\nUnit / Packaging: 12 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010141","en":"Binder Clip No. 112","cn":"长尾夹 No. 112","th":"คลิปหนีบกระดาษ No. 112","unit":"BOX","ex":5.5,"inc":5.89,"spec":"Brand: Baipo\nNo\nUnit / Packaging: 12 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010142","en":"Binder Clip No. 113","cn":"长尾夹 No. 113","th":"คลิปหนีบกระดาษ No. 113","unit":"BOX","ex":5.0,"inc":5.35,"spec":"Brand: Baipo\nNo\nUnit / Packaging: 12 Pcs/Box","sup":"Bangplee","cat":"tool"},{"code":"O1-07010143","en":"Key Cabinet","cn":"钥匙柜","th":"ตู้เก็บกุญแจ 60 ดอก","unit":"PCS","ex":1319.0,"inc":1411.33,"spec":"Brand: Deli\nDeli 72-slot Aluminum Alloy Key Management Box with Lock, Key\nOrganizer/Storage Cabinet/Emergency Key Cabinet Wall-Mounted/Includes Key\nTag, Silver LZ172\nUnit / Packaging: PCS","sup":"Jingdong","cat":"file"},{"code":"O1-07010144","en":"Document Cabinet Model: CFB4","cn":"文件柜 Model: CFB4","th":"ตู้เอกสารรุ่น CFB4","unit":"PCS","ex":550.0,"inc":588.5,"spec":"Brand: ออร์ก้า\nตู้เอกสารรุ่น CFB4\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"file"},{"code":"O1-07010145","en":"Correction Pen","cn":"修正液笔","th":"ปากกาลบคำผิด","unit":"PCS","ex":15.0,"inc":16.05,"spec":"Brand: ตราช้าง\nปากกาลบคำผิด\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010146","en":"Double-Sided Name Plate","cn":"双面姓名牌","th":"ป้ายชื่อสองหน้า","unit":"PCS","ex":105.0,"inc":112.35,"spec":"Brand: แท่นเสียบป้ายชื่อ 2 หน้า JW L2 - 3.5 x 12 นิ้ว\nรหัสสินค้า : 0344-0029\nขนาด 3.5 x 12 นิ้ว (9 x 30.5 ซม.)\nความหนา 2 มม.\nUnit / Packaging: PCS","sup":"Officework","cat":"sign"},{"code":"O1-07010147","en":"Double-Sided Acrylic Tent Card Holder","cn":"双面亚克力台卡","th":"ป้ายอะคริลิค ตั้งโต๊ะ เต๊นท์การ์ด 2 หน้า 11x30x11 ซม.","unit":"PCS","ex":115.0,"inc":123.05,"spec":"Brand: Deflect-o\n* ผลิตจากอะคริลิกคุณภาพดี\n* ผสมสาร UV Protection ป้องกันการเกิดคราบเหลืองหรือขุ่นมัว\n* เหมาะสำหรับสอดป้ายชื่อหรือข้อความต่างๆ\n* รองรับเอกสารขนาด A4\n* ชนิดแนวนอน\n* ขนาด 11x30x11 ซม.\n* สีใส\n* 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"sign"},{"code":"O1-07010148","en":"Double-Sided Acrylic Tent Card Holder","cn":"双面亚克力台卡","th":"ป้ายอะคริลิค ตั้งโต๊ะ เต๊นท์การ์ด 2 หน้า 15x10cm*3mm","unit":"PCS","ex":66.0,"inc":70.62,"spec":"Brand: Free Manufacturing\nFree Manufacturing / V-shaped Acrylic Transparent Triangular Meeting\nBoard/15x10cm*3mm (Thickened Version)/Single\nUnit / Packaging: PCS","sup":"Jingdong","cat":"sign"},{"code":"O1-07010149","en":"Pencil Eraser","cn":"橡皮擦","th":"ยางลบดินสอ Hi-Polymer ZEH-05","unit":"PCS","ex":2.0,"inc":2.14,"spec":"Brand: M&G\nM&G. M&G AXP963PS 2B Eraser (Small)\nUnit / Packaging: PCS","sup":"Jingdong","cat":"write"},{"code":"O1-07010150","en":"Spiral Notebook","cn":"线圈笔记本","th":"สมุดสันห่วง","unit":"PCS","ex":23.0,"inc":24.61,"spec":"Brand: เม้งฮั้ว\nสมุดสันห่วง ขนาด:A5 หนา 70 แกรม (100แผ่น/เล่ม)\nUnit / Packaging: 1 PC","sup":"Bangplee","cat":"note"},{"code":"O1-07010151","en":"Report Notebook","cn":"报告本","th":"สมุดรายงาน","unit":"PCS","ex":16.0,"inc":17.12,"spec":"Brand: Double A\nปกกระดาษอ่อน ผิวมันเงา เนื้อเหนียว ไม่ฉีกขาดง่าย\nเข้าเล่มแบบสันกาว ฉีกใช้งานง่าย ไม่หลุดจากเล่ม\nเนื้อกระดาษหนา เรียบเนียน เขียนไม่สะดุด ให้ความคุ้มค่า\nเส้นบรรทัดมาตรฐานทั้ง 2 ด้าน ช่วยจัดระเบียบการเขียนให้เรียบร้อย\nCenter Mark ช่วยบอกตำแหน่งการเจาะรูสำหรับเก็บเอกสาร\nจุดตีเส้นและตัวเลขบอกบรรทัด สะดวกในการใช้งาน\nเหมาะสำหรับเขียนรายงาน จดบันทึกและฉีกเป็นแผ่นได้\nสีกระดาษ : ขาว กระดาษหนา : 80 แกรม\nขนาดกระดาษ (กว้าง x ยาว) : 21 x 29.7 ซม. (A4)\nบรรจุ 25 แผ่น/เล่ม, 1 เล่ม\nUnit / Packaging: Piece","sup":"Officemate","cat":"note"},{"code":"O1-07010152","en":"Mechanical Pencil Lead 2B Hi-Polymer","cn":"自动铅笔芯 2B Hi-Polymer","th":"ไส้ดินสอ 2B Hi-Polymer","unit":"PCS","ex":5.8,"inc":6.21,"spec":"Brand: Pilot\nไส้ดินสอ 2B\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010153","en":"Mechanical Pencil Lead HB Hi-Polymer","cn":"自动铅笔芯 HB Hi-Polymer","th":"ไส้ดินสอ HB Hi-Polymer","unit":"PCS","ex":6.0,"inc":6.42,"spec":"Brand: Pilot\nไส้ดินสอ HB\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010154","en":"Banknote Counting Wax","cn":"点钞蜡","th":"ขี้ผึ้งนับธนบัตร ขี้ผึ้ง","unit":"PCS","ex":19.0,"inc":20.33,"spec":"Brand: เอลเฟ่น\nขี้ผึ้งนับธนบัตร\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010155","en":"Clear Employee ID Card Holder","cn":"透明员工证卡套","th":"ซองใส่บัตรพนักงานแบบใส 5.6x8.8 ซม.","unit":"PACK","ex":71.0,"inc":75.97,"spec":"Brand: ONE\nบรรจุ 50 ชิ้น/แพ็ค\nผลิตจากพลาสติกคุณภาพดีแข็งแรง ทนทาน ใช้งานได้นาน\nบัตรเจาะรูมาตรฐาน ใช้งานร่วมกับสายคล้องบัตรทั่วไป\nชนิดบัตรแนวตั้ง เหมาะสำหรับใช้งานในหลายสถานการณ์\nรองรับบัตรขนาด 5.8 x 8.5 ซม. ใช้งานสะดวก\nบรรจุ 50 ชิ้น/แพ็ค คุ้มค่ากับการใช้งานระยะยาว\nUnit / Packaging: Pack","sup":"Officemate","cat":"sign"},{"code":"O1-07010156","en":"Retractable Badge Reel with Logo 长安汽车 CHANGAN","cn":"带标志伸缩扣 长安汽车CHANGAN","th":"โยโย่พร้อมโลโก้ 长安汽车 CHANGAN","unit":"PCS","ex":23.0,"inc":24.61,"spec":"Brand: Free Manufacturing\nFree Manufacturing / Easy-Pull Buckle / Solid White / Single \"Material: ABS\nExtendable length approx. 74cm Diameter 3.2cm Total thickness approx. 1cm\nThe epoxy resin in the center needs to be customized; please provide a CDR or AI\nfile.\"\nUnit / Packaging: PCS","sup":"Jingdong","cat":"sign"},{"code":"O1-07010157","en":"Clear Nano Gel Double-Sided Tape","cn":"透明纳米双面胶","th":"เทปนาโนเจลใส","unit":"PCS","ex":76.0,"inc":81.32,"spec":"Brand: Croco\n- ใช้ยึดติดหรือจัดระเบียบสิ่งสองต่างๆ\n- สะดวก ติดแน่น ทนทาน ลอกได้ไม่ทำลายพื้นผิว\n- สามารถใช้ยึดติดเพื่อป้องกันการเลื่อนได้\n- เมื่อกาวเริ่มไม่เหนียว ล้างด้วยน้ำเปล่าแล้วนำมาใช้ใหม่ได้\n- รับน้ำหนักได้ 1kg ต่อ 6.25 ตารางเซ็นติเมตร\n- เนื้อเทปหนา 2 มม.\n- ขนาด 30มม. x 3เมตร\n- จำนวน 1 ม้วน\nUnit / Packaging: Piece","sup":"Officemate","cat":"tape"},{"code":"O1-07010158","en":"Linen Document Storage Box with Lid: Grey color","cn":"带盖亚麻文件收纳箱: 灰色","th":"กล่องผ้าลินินใส่เอกสารแบบมีฝาปิด สีเทา","unit":"PCS","ex":273.0,"inc":292.11,"spec":"Brand: Free Manufacturing\nFree Manufacturing / Cotton and Linen Home Fabric Organizer Box / Classic Gray\nSmall Size 32*24*18cm / Single\nUnit / Packaging: PCS","sup":"Jingdong","cat":"file"},{"code":"O1-07010159","en":"Linen Document Storage Box with Lid: Beige color","cn":"带盖亚麻文件收纳箱： 米色","th":"กล่องผ้าลินินใส่เอกสารแบบมีฝาปิด สีเบจ","unit":"PCS","ex":273.0,"inc":292.11,"spec":"Brand: Free Manufacturing\nFree Manufacturing / Cotton and Linen Home Fabric Organizer Box / Classic Off-\nWhite Small Size 32*24*18cm / Single\nUnit / Packaging: PCS","sup":"Jingdong","cat":"file"},{"code":"O1-07010160","en":"Stainless Steel Sign Stand","cn":"不锈钢标牌架","th":"ขาตั้งป้ายสแตนเลส","unit":"PCS","ex":540.0,"inc":577.8,"spec":"Brand: Free Manufacturing\nFree Manufacturing / Stainless Steel Stand / A3 Silver (Rounded Corner) Sign\n(Standard Version) / Single Piece\nUnit / Packaging: PCS","sup":"Jingdong","cat":"sign"},{"code":"O1-07010161","en":"Packing String 180 m","cn":"包装绳 180 m","th":"เชือกพัสดุเชือกขาวแดง ยาว 180 เมตร","unit":"PCS","ex":36.0,"inc":38.52,"spec":"เชือกขาวแดง\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tape"},{"code":"O1-07010162","en":"Clear Zip Bag 7*10 cm","cn":"透明自封袋 7*10 cm","th":"ถุงซิปใส 7*10 ซม.","unit":"PACK","ex":63.0,"inc":67.41,"spec":"Brand: Zoftra\nผลิตจากเม็ดพลาสติกใหม่ 100% สะอาด ไร้กลิ่น\nถุงซิปใสเนื้อเหนียว ซิปแข็งแรงใช้งานได้ทนทาน\nปากถุงยาวไม่เสมอกัน เพื่อให้เปิดใช้งานได้ง่าย\nใส่อาหารหรือของใช้ทนอุณหภูมิได้ถึง 60°C\nความหนา 60 ไมครอน/ด้าน ป้องกันรั่วซึมได้ดี\nUnit / Packaging: Pack","sup":"Officemate","cat":"file"},{"code":"O1-07010163","en":"Clear Zip Bag 8*12 cm","cn":"透明自封袋 8*12 cm","th":"ถุงซิปใส 8*12 ซม.","unit":"PACK","ex":88.0,"inc":94.16,"spec":"Brand: ไม่มีแบรนด์\nถุงซิปใส 8*12\nUnit / Packaging: 50 Pcs/Pack Or 1 Kg/Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010164","en":"Clear Zip Bag 15*23 cm","cn":"透明自封袋 15*23 cm","th":"ถุงซิปใส 15*23 ซม.","unit":"PACK","ex":88.0,"inc":94.16,"spec":"Brand: ไม่มีแบรนด์\nถุงซิปใส 15*23\nUnit / Packaging: 50 Pcs/Pack Or 1 Kg/Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010165","en":"Clear Zip Bag 30*46 cm","cn":"透明自封袋 30*46 cm","th":"ถุงซิปใส 30*46 ซม.","unit":"PACK","ex":88.0,"inc":94.16,"spec":"Brand: ไม่มีแบรนด์\nถุงซิปใส 30*46\nUnit / Packaging: 50 Pcs/Pack Or 1 Kg/Pack","sup":"Bangplee","cat":"file"},{"code":"O1-07010166","en":"ONE Glossy White Paper Sticker","cn":"ONE白色光面纸贴纸","th":"ONE สติกเกอร์กระดาษขาวเงา","unit":"PACK","ex":129.0,"inc":138.03,"spec":"Brand: ONE\nสติกเกอร์กระดาษ สีขาวเงา ให้ผิวเรียบเนียน สวยงาม\nความหนา 70 แกรม ติดแน่น ทนทานต่อการใช้งาน\nเนื้อกาวติดเหนียว ติดสนิท ไม่หลุดลอกง่าย\nขนาด A4 (210x297 mm.) จำนวน 100 แผ่น/แพ็ค\nเหมาะสำหรับงานศิลปะ งานประดิษฐ์และงานพิมพ์\nUnit / Packaging: Pack","sup":"Officemate","cat":"paper"},{"code":"O1-07010167","en":"A4 Colored Copy Paper 80 gsm","cn":"A4彩色复印纸 80克","th":"กระดาษสีถ่ายเอกสาร ขนาด:A4 หนา 80 แกรม","unit":"PACK","ex":76.0,"inc":81.32,"spec":"Brand: Smart\nกระดาษสีถ่ายเอกสาร ขนาด:A4 หนา 80 แกรม\nUnit / Packaging: 500 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010168","en":"A4 Colored Copy Paper 120 gsm","cn":"A4彩色复印纸 120克","th":"กระดาษสีถ่ายเอกสาร ขนาด:A4 หนา 120 แกรม","unit":"PACK","ex":82.0,"inc":87.74,"spec":"Brand: วีนัส\nกระดาษสีถ่ายเอกสาร ขนาด:A4 หนา 120 แกรม\nUnit / Packaging: 250 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010169","en":"A4 Colored Copy Paper 150 gsm","cn":"A4彩色复印纸 150克","th":"กระดาษสีถ่ายเอกสาร ขนาด:A4 หนา 150 แกรม","unit":"PACK","ex":120.0,"inc":128.4,"spec":"Brand: วีนัส\nกระดาษสีถ่ายเอกสาร ขนาด:A4 หนา 150 แกรม\nUnit / Packaging: 250 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010170","en":"Cardstock 200 gsm","cn":"卡纸 200克","th":"กระดาษการ์ด A4 200 แกรม","unit":"PACK","ex":128.0,"inc":136.96,"spec":"Brand: Flying\nกระดาษการ์ด A4 200 แกรม\nUnit / Packaging: 100 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010171","en":"Cardstock 210 gsm","cn":"卡纸 210克","th":"กระดาษการ์ด A4 210 แกรม","unit":"PACK","ex":58.0,"inc":62.06,"spec":"Brand: วีนัส\nกระดาษการ์ด A4 210 แกรม\nUnit / Packaging: 50 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010172","en":"Cardstock 250 gsm","cn":"卡纸 250克","th":"กระดาษการ์ด A4 250 แกรม","unit":"PACK","ex":32.0,"inc":34.24,"spec":"Brand: ONE\nเนื้อกระดาษหนา เรียบ ละเอียด แข็งแรง\nสีกระดาษสวย เนียนสมํ่าเสมอตลอดแผ่น\nใช้งานทั้ง 2 หน้า ให้ความคุ้มค่าที่มากกว่า\nเหมาะทำปกรายงาน การ์ดอวยพร นามบัตร\nใช้กับเครื่องถ่ายเอกสาร เครื่องพิมพ์ทุกประเภท\nUnit / Packaging: Pack","sup":"Officemate","cat":"paper"},{"code":"O1-07010173","en":"White Cardstock A4 240 gsm","cn":"A4 白色卡纸 240克","th":"กระดาษการ์ดขาว","unit":"PACK","ex":105.0,"inc":112.35,"spec":"Brand: Spirit\nกระดาษการ์ดขาว 210gsm A4 Spirit (50 แผ่น)\nUnit / Packaging: pack","sup":"Jingdong","cat":"paper"},{"code":"O1-07010174","en":"White Cardstock A4 300 gsm","cn":"A4 白色卡纸 300克","th":"กระดาษการ์ดขาว","unit":"PACK","ex":120.0,"inc":128.4,"spec":"Brand: วีนัส\nกระดาษการ์ดขาว\nUnit / Packaging: 1 Pack, 50 Sheets","sup":"Bangplee","cat":"paper"},{"code":"O1-07010175","en":"100 lb Textured Paper","cn":"100 磅纹理纸","th":"กระดาษ 100 ปอนด์ texture","unit":"PACK","ex":149.0,"inc":159.43,"spec":"Brand: texture\nกระดาษ 100 ปอนด์ texture\nUnit / Packaging: 100 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010176","en":"Copy Paper A3 70 gram","cn":"A3 70克复印纸","th":"กระดาษถ่ายเอกสาร A3 70 แกรม","unit":"BOX","ex":850.0,"inc":909.5,"spec":"Brand: Alcott\nกระดาษถ่ายเอกสาร 70แกรม A3\nUnit / Packaging: กล่อง / 5 Reams/Box","sup":"Bangplee","cat":"paper"},{"code":"O1-07010177","en":"Copy Paper A4 70 gram","cn":"A4 70克复印纸","th":"กระดาษถ่ายเอกสาร A4 70 แกรม","unit":"BOX","ex":320.0,"inc":342.4,"spec":"Brand: Smartist\nกระดาษถ่ายเอกสาร 70แกรม A4\nUnit / Packaging: กล่อง / 5 Reams/Box","sup":"Bangplee","cat":"paper"},{"code":"O1-07010178","en":"Copy Paper A3 80 gram","cn":"A3 80克复印纸","th":"กระดาษถ่ายเอกสาร A3 80 แกรม","unit":"BOX","ex":940.0,"inc":1005.8,"spec":"Brand: Alcott\nกระดาษถ่ายเอกสาร 80แกรม A3\nUnit / Packaging: กล่อง / 5 Reams/Box","sup":"Bangplee","cat":"paper"},{"code":"O1-07010179","en":"Copy Paper A4 80 gram","cn":"A4 80克复印纸","th":"กระดาษถ่ายเอกสาร A4 80 แกรม","unit":"BOX","ex":380.0,"inc":406.6,"spec":"Brand: Smart\nกระดาษถ่ายเอกสาร 80แกรม A4\nUnit / Packaging: กล่อง / 5 Reams/Box","sup":"Bangplee","cat":"paper"},{"code":"O1-07010180","en":"Flip Chart Paper","cn":"白板挂纸","th":"กระดาษฟลิปชารท","unit":"PCS","ex":117.0,"inc":125.19,"spec":"Brand: ONE\nผลิตจากกระดาษปอนด์อย่างดี\nความหนา 70 แกรม\nเหมาะสำหรับใช้งานกับกระดานฟลิปชาร์ท\nขนาดกระดาษ 65x90 ซม.\n25 แผ่น/แพ็ค, 1 แพ็ค\nUnit / Packaging: Pack","sup":"Officemate","cat":"sign"},{"code":"O1-07010181","en":"A4 Sticker Paper","cn":"A4贴纸","th":"กระดาษสติ้กเกอร์ A4","unit":"PCS","ex":62.0,"inc":66.34,"spec":"Brand: Huaiyu\nHuaiyu A4 Matte Self-adhesive Printing Paper 50 Sheets/set- Yellow, Thailand\nExclusive\nUnit / Packaging: 50 Sheets/set","sup":"Jingdong","cat":"paper"},{"code":"O1-07010182","en":"A3 Laminating Pouch (125 micron)","cn":"A3 125微米塑封膜","th":"พลาสติกเคลือบบัตร A3 หนา 125 ไมครอน","unit":"PCS","ex":340.0,"inc":363.8,"spec":"Brand: ออร์ก้า\nพลาสติกเคลือบบัตร A3 หนา 125 ไมครอน\nUnit / Packaging: 100 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010183","en":"A3 Laminating Pouch (250 micron)","cn":"A3 250微米塑封膜","th":"พลาสติกเคลือบบัตร A3 หนา 250 ไมครอน","unit":"PCS","ex":450.0,"inc":481.5,"spec":"Brand: ช้าง\nพลาสติกเคลือบบัตร A3 หนา 250 ไมครอน\nUnit / Packaging: 100 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010184","en":"A4 Laminating Pouch (125 micron)","cn":"O1-07010184","th":"พลาสติกเคลือบบัตร A4 หนา 125 ไมครอน","unit":"PCS","ex":137.0,"inc":146.59,"spec":"Brand: พลาสติกเคลือบบัตร ออร์ก้า A4 125 mc. 216x303 มม.\nขนาด 216 x 303 มม. (A4)\nความหนา 125 ไมครอน\nUnit / Packaging: บรรจุ 100 แผ่น/กล่อง","sup":"Officework","cat":"paper"},{"code":"O1-07010185","en":"A4 Laminating Pouch (250 micron)","cn":"A4 250微米塑封膜","th":"พลาสติกเคลือบบัตร A4 หนา 250 ไมครอน","unit":"PCS","ex":185.0,"inc":197.95,"spec":"Brand: ออร์ก้า\nพลาสติกเคลือบบัตร A4 หนา 250 ไมครอน\nUnit / Packaging: 100 Sheets/Pack","sup":"Bangplee","cat":"paper"},{"code":"O1-07010186","en":"Carbonless Continuous Paper","cn":"无碳连续打印纸","th":"กระดาษต่อเนื่องเคมี 9\"×11\" รูปแบบ 4 ชั้น (1000 ชิ้น)","unit":"BOX","ex":670.0,"inc":716.9,"spec":"Brand: T.K.S\nกระดาษต่อเนื่องเคมี 9\"×11\" รูปแบบ 4 ชั้น\nUnit / Packaging: 1,000 Sets/Box","sup":"Bangplee","cat":"paper"},{"code":"O1-07010187","en":"Carbonless Continuous Paper","cn":"T.K.S.无碳连续打印纸","th":"กระดาษต่อเนื่องเคมี 9\"×11\" รูปแบบ 4 ชั้น (500 ชิ้น)","unit":"BOX","ex":670.0,"inc":716.9,"spec":"Brand: T.K.S\nกระดาษต่อเนื่องเคมี 9\"×11\" รูปแบบ 4 ชั้น\nUnit / Packaging: 500 Sets/Box","sup":"Bangplee","cat":"paper"},{"code":"O1-07010188","en":"A2 Roll Paper","cn":"A2卷筒纸","th":"กระดาษ A2 ชนิดม้วน","unit":"ROLL","ex":155.0,"inc":165.85,"spec":"Brand: ไม่มีแบรนด์\nกระดาษ A2 ชนิดม้วน\nUnit / Packaging: 1 Roll","sup":"Bangplee","cat":"paper"},{"code":"O1-07010189","en":"A2 Paper","cn":"A2纸","th":"ขนาดกระดาษ A2","unit":"REAM","ex":2010.0,"inc":2150.7,"spec":"Brand: Elifo\nElifo A2 drawing paper 20sheet/pack. 25pack/box total 500sheets, thickened paper\nfor hand-drawn posters, large white paper, marker paper, engineering drawing paper,\ndrawing paper, printing paper, poster paper, student architectural design paper,\n594*420mm.\nUnit / Packaging: 20sheet/pack. 25pack/box total 500sheets","sup":"Jingdong","cat":"paper"},{"code":"O1-07010190","en":"ONE Clear PVC Sticker","cn":"ONE透明PVC贴纸","th":"ONE สติกเกอร์ PVC","unit":"PACK","ex":40.0,"inc":42.8,"spec":"Brand: ONE\nสติกเกอร์ PVC หนา 60 ไมครอน (ด้านหน้า)\nกระดาษรองหนา 150 ไมครอน\nไม่ควรเก็บในที่ชื้น และให้ห่างจากเปลวไฟ\nเหมาะกับงานเคลือบรูป งานศิลปะ และงานประดิษฐ์ต่าง ๆ\nขนาดสินค้า : 210 x 297 มล. (A4)\n20 แผ่น/แพ็ค\nUnit / Packaging: Pack","sup":"Officemate","cat":"paper"},{"code":"O1-07010191","en":"Carbon Paper","cn":"复写纸","th":"กระดาษคาร์บอน สีน้ำเงิน","unit":"BOX","ex":97.0,"inc":103.79,"spec":"Brand: ตราม้า\nกระดาษคาร์บอน สีน้ำเงิน ขนาด 21 x 33 ซม.\nUnit / Packaging: 1 กล่อง บรรจุ 100 แผ่น","sup":"Bangplee","cat":"paper"},{"code":"O1-07010192","en":"Carbon Paper","cn":"复写纸","th":"กระดาษคาร์บอน สีดำ","unit":"BOX","ex":109.8,"inc":117.49,"spec":"Brand: Delva\nกระดาษเคลือบคาร์บอน คุณภาพดีเขียนติดง่าย\nใช้สำหรับพิมพ์คัดลอก สำเนา จากต้นฉบับ\nชนิดพิมพ์ดำ ขนาด 21x33 ซม.\nชนิด : พิมพ์\nสีดำ\nบรรจุ 100 แผ่น/แพ็ค\nUnit / Packaging: Pack","sup":"Officemate","cat":"paper"},{"code":"O1-07010193","en":"Hardcover Ledger Book","cn":"硬皮账簿","th":"สมุดกระดาษปกแข็ง","unit":"PCS","ex":24.0,"inc":25.68,"spec":"Brand: สมุดปกน้ำเงิน 2/80 55g 2k\nความหนา 55 แกรม, ขนาด 19 x 31 ซม.\nจำนวน 80 แผ่น","sup":"Officework","cat":"note"},{"code":"O1-07010194","en":"Ballpoint Pen 0.5 mm Blue ink","cn":"0.5mm 蓝色圆珠笔","th":"ปากกาลูกลื่น หัวขนาด: 0.5 มม. สีน้ำเงิน","unit":"EA","ex":77.0,"inc":82.39,"spec":"Brand: Deli\nDeli 140025486 DL-Q100-BL Ballpoint Pen Mini tip: 0.7mm, blue ink 30 pcs/box\nUnit / Packaging: box","sup":"Jingdong","cat":"write"},{"code":"O1-07010195","en":"Ballpoint Pen 0.5 mm Red ink","cn":"0.5mm 红色圆珠笔","th":"ปากกาลูกลื่น หัวขนาด: 0.5 มม.สีแดง","unit":"EA","ex":77.0,"inc":82.39,"spec":"Brand: Deli\nDeli 140025483 DL-Q100-RD Ballpoint Pen Mini tip: 0.7mm, red ink 30 pcs/box\nUnit / Packaging: box","sup":"Jingdong","cat":"write"},{"code":"O1-07010196","en":"Ballpoint Pen 0.5 mm Black ink","cn":"0.5mm 黑色圆珠笔","th":"ปากกาลูกลื่นขนาด: 0.5 มม.สีดำ","unit":"EA","ex":77.0,"inc":82.39,"spec":"Brand: Deli\nDeli 140025484 DL-Q100-BK Ballpoint Pen Mini tip: 0.7mm, black ink 30 pcs/box\nUnit / Packaging: box","sup":"Jingdong","cat":"write"},{"code":"O1-07010197","en":"Ballpoint Pen 0.5 mm Blue Ink, 50 Pens/Pack","cn":"圆珠笔 0.5毫米蓝色墨水 50支/包","th":"ปากกาลูกลื่น 0.5 มม. หมึกสีน้ำเงิน บรรจุ 50 ด้าม/แพ็ค","unit":"EA","ex":137.5,"inc":147.13,"spec":"Brand: ควอนตั้มBrand: ควอนตั้ม\nปากกาลูกลื่น 0.5 มม. หมึกสีน้ำเงิน บรรจุ 50 ด้าม/แพ็ค\nUnit / Packaging: 50 Sticks/Pack","sup":"Bangplee","cat":"write"},{"code":"O1-07010198","en":"Dual-Tip Marker","cn":"双头记号笔","th":"ปากกามาร์คเกอร์ 2 หัว สีแดง","unit":"PCS","ex":78.0,"inc":83.46,"spec":"Brand: Deli\nปากกามาร์คเกอร์ 2 หัว\nUnit / Packaging: 12 Pens/Pack","sup":"Bangplee","cat":"write"},{"code":"O1-07010199","en":"Dual-Tip Marker","cn":"双头记号笔","th":"ปากกามาร์คเกอร์ 2 หัว สีน้ำเงิน","unit":"PCS","ex":78.0,"inc":83.46,"spec":"Brand: Deli\nปากกามาร์คเกอร์ 2 หัว\nUnit / Packaging: 12 Pens/Pack","sup":"Bangplee","cat":"write"},{"code":"O1-07010200","en":"Gel Pen","cn":"中性笔","th":"ปากกาหมึกเจลสีดำ (ENERGEL X BLN105) หัว 0.5 มม.","unit":"PCS","ex":28.5,"inc":30.5,"spec":"Brand: Pentel\nปากกาหมึกเจล แบบกด ใช้งานสะดวก\nเขียนลื่นและแห้งเร็วกว่าหมึกเจลทั่วไป ด้วยน้ำหมึกสูตรพิเศษของเพนเทล\nผลิตจากวัสดุรีไซเคิล 84% ด้ามใส สามารถมองเห็นปริมาณหมึกได้\nหุ้มยางนิ่มบริเวณ Grip Zone กระชับมือขณะเขียน เขียนนานไม่ล้า\nมีคลิปหนีบสำหรับพกพาได้สะดวก\nสามารถถอดเปลี่ยนไส้ปากกาได้ (รุ่น LRN5)\nผลิตและนำเข้าจากประเทศญี่ปุ่น\nหมึกสีดำ ขนาดหัวปากกา 0.5 มม.\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010201","en":"Gel Pen","cn":"中性笔","th":"ปากกาหมึกเจล สีน้ำเงิน (ENERGEL X BLN105) หัว 0.5 มม.","unit":"PCS","ex":28.5,"inc":30.5,"spec":"Brand: Pentel\nปากกาหมึกเจล แบบกด ใช้งานสะดวก\nเขียนลื่นและแห้งเร็วกว่าหมึกเจลทั่วไป ด้วยน้ำหมึกสูตรพิเศษของเพนเทล ผลิตจาก\nวัสดุรีไซเคิล 84% ด้ามใส สามารถมองเห็นปริมาณหมึกได้หุ้มยางนิ่มบริเวณ Grip\nZone กระชับมือขณะเขียน เขียนนานไม่ล้า\nมีคลิปหนีบสำหรับพกพาได้สะดวก\nสามารถถอดเปลี่ยนไส้ปากกาได้ (รุ่น LRN5)\nผลิตและนำเข้าจากประเทศญี่ปุ่น\nหมึกสีน้ำเงิน ขนาดหัวปากกา 0.5 มม.\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010202","en":"Gel Pen","cn":"中性笔","th":"ปากกาหมึกเจลสีแดง (ENERGEL X BLN105) หัว 0.5 มม.","unit":"PCS","ex":28.5,"inc":30.5,"spec":"Brand: Pentel\nปากกาหมึกเจล แบบกด * เขียนลื่นและแห้งเร็วกว่าหมึกเจลทั่วๆ ไป ด้วยน้ำหมึกสูตร\nพิเศษของเพนเทล * ผลิตจากวัสดุรีไซเคิล 84% ด้ามใส สามารถมองเห็นปริมาณหมึก\nได้ * หุ้มยางนิ่มบริเวณ Grip Zone กระชับมือขณะเขียนมากยิ่งขึ้น * มีคลิปหนีบ\nสำหรับพกพา * สามารถถอดเปลี่ยนไส้ปากกาได้ (รุ่น LRN5) * ผลิตและนำเข้าจาก\nประเทศญี่ปุ่น * หมึกสีแดง * ขนาดหัวปากกา 0.5 มม. * จำนวน 1 ด้าม *หมายเหตุการ\nสั่งซื้อ* * กรณีซื้อเป็นกล่อง สินค้าบรรจุ 12 ด้าม/กล่อง\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010203","en":"Fine-Tip Whiteboard Marker","cn":"细头白板笔","th":"ปากกาไวท์บอร์ด หัวแหลม สีแดง","unit":"PCS","ex":110.0,"inc":117.7,"spec":"Brand: M&G\nM&G. AWMY2271 Red Single Tip Whiteboard Marker — AWMY2271 60028454\n12pcs/box\nUnit / Packaging: box","sup":"Jingdong","cat":"sign"},{"code":"O1-07010204","en":"Fine-Tip Whiteboard Marker","cn":"细头白板笔","th":"ปากกาไวท์บอร์ด หัวแหลม สีน้ำเงิน","unit":"PCS","ex":110.0,"inc":117.7,"spec":"Brand: M&G\nM&G. AWMY2271 Blue Single Tip Whiteboard Marker — AWMY2271 60028453\n12pcs/box\nUnit / Packaging: box","sup":"Jingdong","cat":"sign"},{"code":"O1-07010205","en":"Fine-Tip Whiteboard Marker","cn":"细头白板笔","th":"ปากกาไวท์บอร์ด หัวแหลม สีดำ","unit":"PCS","ex":110.0,"inc":117.7,"spec":"Brand: M&G\nM&G. AWMY2271 Black Single Tip Whiteboard Marker — AWMY2271\n60028452 12pcs/box\nUnit / Packaging: box","sup":"Jingdong","cat":"sign"},{"code":"O1-07010206","en":"Fine-Tip Whiteboard Marker","cn":"细头白板笔","th":"ปากกาไวท์บอร์ด หัวแหลม สีเขียว","unit":"PCS","ex":17.5,"inc":18.73,"spec":"Brand: Pilot\nปากกาไวท์บอร์ด ชนิดหัวแหลม\nหัวปากกาแข็งแรง ไม่แตกยุ่ยง่าย\nลบออกง่าย ไม่ทิ้งคราบหมึก\nสามารถเติมหมึกได้เมื่อหมึกหมด\nหมึกสีเขียว\nขนาดเส้น 1.5-2 มม.(ขึ้นอยู่กับองศาการเขียน)\nความยาวด้าม 13.2 ซม.\nจำนวน 1 ด้าม\nUnit / Packaging: Piece","sup":"Officemate","cat":"sign"},{"code":"O1-07010207","en":"Mechanical Pencil","cn":"自动铅笔","th":"ดินสอกด","unit":"PCS","ex":6.5,"inc":6.96,"spec":"Brand: H-8022\nดินสอกด\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010208","en":"Wooden Pencil","cn":"木铅笔","th":"ดินสอไม้","unit":"PCS","ex":130.0,"inc":139.1,"spec":"Brand: ดินสอดำ 2B ควอนตั้ม รุ่น QP910+920 (แพ็ค 50 แท่ง)\nความเข้มไส้ดินสอ 2B","sup":"Officework","cat":"write"},{"code":"O1-07010209","en":"Highlighter","cn":"荧光笔","th":"ปากกาเน้นข้อความ","unit":"PCS","ex":8.0,"inc":8.56,"spec":"Brand: เอลเฟ่น\nปากกาเน้นข้อความ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010210","en":"Washable Watercolor Pen Set","cn":"可水洗水彩笔套装","th":"ปากกาสีน้ำล้างออกได้","unit":"BOX","ex":69.0,"inc":73.83,"spec":"Brand: มาสเตอร์อาร์ท\nปากกาสีน้ำ\nUnit / Packaging: 1 Box","sup":"Bangplee","cat":"write"},{"code":"O1-07010211","en":"CD Marker","cn":"光盘记号笔","th":"ปากกาเขียนซีดี Point Type : 0.5 มม. หัว สีดำ","unit":"PCS","ex":5.0,"inc":5.35,"spec":"Brand: Deli\nDeli 6823 Double-ended Marker (Black) , Thailand Exclusive\nUnit / Packaging: PCS","sup":"Jingdong","cat":"write"},{"code":"O1-07010212","en":"CD Marker","cn":"光盘记号笔","th":"ปากกาเขียนซีดีสีแดง","unit":"PCS","ex":15.8,"inc":16.91,"spec":"Brand: M&G\nM&G. APM21372 Red Double Tip Marker — APM21372 00015764\nUnit / Packaging: PCS","sup":"Jingdong","cat":"write"},{"code":"O1-07010213","en":"CD Marker","cn":"光盘记号笔","th":"ปากกาเขียนซีดีสีดำ","unit":"PCS","ex":15.8,"inc":16.91,"spec":"Brand: M&G\nM&G. APM21372 Black Double Tip Marker — APM21372 00015762\nUnit / Packaging: PCS","sup":"Jingdong","cat":"write"},{"code":"O1-07010214","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์สีดำ","unit":"PCS","ex":26.0,"inc":27.82,"spec":"Brand: Pentel\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010215","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์สีเงิน","unit":"PCS","ex":26.0,"inc":27.82,"spec":"Brand: Pentel\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010216","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์สีเงิน","unit":"PCS","ex":26.0,"inc":27.82,"spec":"Brand: Pentel\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010217","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์คละสีม่วง เขียว ฟ้า ชมพูน้ำเงิน เขียว","unit":"PCS","ex":33.0,"inc":35.31,"spec":"Brand: Pentel\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010218","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์สีดำ 0.8 - 1.2 มม.","unit":"PCS","ex":33.0,"inc":35.31,"spec":"Brand: PX-21\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010219","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์สีเงิน 0.8 - 1.2 มม.","unit":"PCS","ex":33.0,"inc":35.31,"spec":"Brand: PX-21\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010220","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์สีเงิน 0.8 - 1.2 มม.","unit":"PCS","ex":33.0,"inc":35.31,"spec":"Brand: PX-21\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010221","en":"Paint Marker","cn":"油漆笔","th":"ปากกาเพ้นท์คละสีม่วง เขียว ฟ้า ชมพูน้ำเงิน เขียว สีเงิน 0.8 - 1.2 มม.","unit":"PCS","ex":33.0,"inc":35.31,"spec":"Brand: PX-21\nปากกาเพ้นท์\nUnit / Packaging: 1 Pen","sup":"Bangplee","cat":"write"},{"code":"O1-07010222","en":"Erasable Pen","cn":"可擦笔","th":"ปากกาลบได้","unit":"PCS","ex":21.0,"inc":22.47,"spec":"Brand: ไม่มีแบรนด์\nปากกาลบได้\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010223","en":"SIGN HERE Index Flag","cn":"SIGN HERE索引标签","th":"ฟิล์มอินเด็กซ์ข้อความ SIGN Here","unit":"PACK","ex":19.0,"inc":20.33,"spec":"Brand: Bennon\nฟิล์มอินเด็กซ์ข้อความ SIGN Here ขนาด:2X45 มม.\nUnit / Packaging: 1 Pack","sup":"Bangplee","cat":"note"},{"code":"O1-07010224","en":"Post-it Page Marker 670-5AP","cn":"Post-it分页标签 670-5AP","th":"POST-IT เพจ มาร์กเกอร์ 670-5AP","unit":"PACK","ex":10.5,"inc":11.24,"spec":"Brand: M&G\nM&G. AS23O528 2×3 PET Self-Adhesive Page Markers 5-Color Strips —\nAS23O528 60075731\nUnit / Packaging: Pack","sup":"Jingdong","cat":"note"},{"code":"O1-07010225","en":"Post-it Notes","cn":"Post-it便签","th":"POST-IT โน้ต เพจมาร์กเกอร์โพสต์ -อิท 670- 5AU","unit":"PACK","ex":53.0,"inc":56.71,"spec":"Brand: 3M\nPOST-IT โน้ต เพจมาร์กเกอร์โพสต์-อิท 670-5AU สี: คละสีขนาด:1.27X5ซม.\nUnit / Packaging: 1 Pack","sup":"Bangplee","cat":"note"},{"code":"O1-07010226","en":"Post-it Notes 653-9ASST","cn":"Post-it便签 653-9ASST","th":"POST-IT กระดาษโน้ต 653-9ASST","unit":"PACK","ex":99.0,"inc":105.93,"spec":"Brand: Post-it\nโพสต์-อิท® โน้ตรุ่น 653-9ASST\n1.5นิ้ว x 2นิ้ว 9เล่มต่อแพ็ค\nใช้สำหรับจดโน้ต เตือนความจำ\nติดแน่นลอกออกได้ติดซ้ำได้หลายครั้ง ไม่ทำลายพื้นผิว\nขนาด 1.5x2 นิ้ว\nUnit / Packaging: Pack","sup":"Officemate","cat":"note"},{"code":"O1-07010227","en":"Post-it Super Sticky Notes 654-24SSMIA","cn":"Post-it超强粘便签 654-24SSMIA","th":"POST-IT ซูเปอร์สติกกี้ 654-24SSMIA","unit":"PACK","ex":300.0,"inc":321.0,"spec":"Brand: DeliDL-A2602\nPOST-IT ซูเปอร์สติกกี้ 654-24SSMIA\nUnit / Packaging: 24 Books/Pack","sup":"Bangplee","cat":"note"},{"code":"O1-07010228","en":"Post-it Notes","cn":"Post-it便签","th":"โพสต์ -อิท โน้ต","unit":"PACK","ex":108.0,"inc":115.56,"spec":"Brand: DeliDL-A1202\nโพสต์-อิท โน้ต\nUnit / Packaging: 12 Books/Pack","sup":"Bangplee","cat":"note"},{"code":"O1-07010229","en":"Canon BH-7 BK Black Print Head","cn":"佳能BH-7 BK黑色打印头","th":"หัวพิมพ์ Canon BH-7 BK Black","unit":"PCS","ex":850.0,"inc":909.5,"spec":"Brand: Canon\nหัวพิมพ์ Canon BH-7 BK Black\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"it"},{"code":"O1-07010230","en":"Canon CH-7 CL Color Print Head","cn":"佳能CH-7 CL彩色打印头","th":"หัวพิมพ์ Canon CH-7 CL Color 3","unit":"PCS","ex":990.0,"inc":1059.3,"spec":"Brand: Canon\nหัวพิมพ์ Canon CH-7 CL Color 3 สี\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"it"},{"code":"O1-07010231","en":"Alkaline Battery","cn":"碱性电池","th":"ถ่านอัลคาไลน์ AAA","unit":"PACK","ex":624.0,"inc":667.68,"spec":"Brand: Panasonic\nถ่านอัลคาไลน์\nUnit / Packaging: 1 Pack, 48 Pcs","sup":"Bangplee","cat":"it"},{"code":"O1-07010232","en":"Alkaline Battery","cn":"碱性电池","th":"ถ่านอัลคาไลน์ AA","unit":"PACK","ex":624.0,"inc":667.68,"spec":"Brand: Panasonic\nถ่านอัลคาไลน์\nUnit / Packaging: 1 Pack, 48 Pcs","sup":"Bangplee","cat":"it"},{"code":"O1-07010233","en":"Alkaline Battery D","cn":"碱性电池 D","th":"ถ่านอัลคาไลน์ D","unit":"PACK","ex":168.0,"inc":179.76,"spec":"Brand: Panasonic D\nถ่านอัลคาไลน์\nUnit / Packaging: 1 Pack, 48 Pcs","sup":"Bangplee","cat":"it"},{"code":"O1-07010234","en":"Alkaline Battery 9V","cn":"碱性电池 9V","th":"ถ่านอัลคาไลน์ 9V","unit":"PACK","ex":60.0,"inc":64.2,"spec":"Brand: Panasonic 9V\nเหมาะสำหรับอุปกรณ์อิเล็กทรอนิกส์ที่ต้องการพลังงานสูง เช่น กล้องถ่ายรูปดิจิทัล,\nเครื่องเล่นเทป/ซีดี/วีซีดีพกพา ฯลฯ\nได้รับมาตรฐานอุตสาหกรรม\nไร้สารปรอท\nกำลังไฟ 9 โวลต์\nขนาด 9V\nจำนวน 1 ก้อน/แพ็ค\nผลิตในประเทศไทย\nUnit / Packaging: Pack","sup":"Officemate","cat":"it"},{"code":"O1-07010235","en":"Coin Cell Battery","cn":"纽扣电池","th":"ถ่านกระดุม CR2450","unit":"PACK","ex":49.0,"inc":52.43,"spec":"Brand: JDI Choice\nCR2450 Coin Cell Battery, 3V Lithium Battery\nUnit / Packaging: Pack","sup":"Jingdong","cat":"it"},{"code":"O1-07010236","en":"Coin Cell Battery","cn":"纽扣电池","th":"ถ่านกระดุม CR-2032","unit":"PACK","ex":65.0,"inc":69.55,"spec":"Brand: ถ่านลิเธียมเม็ดกระดุม Panasonic CR-2032\nบรรจุ 5 ก้อน/แพ็ค\nถ่านลิเธียมเม็ดกระดุม Panasonic CR-2032\nบรรจุ 5 ก้อน/แพ็ค\nUnit / Packaging: 1 แพค","sup":"Officework","cat":"it"},{"code":"O1-07010237","en":"Dot Matrix Printer Ribbon","cn":"针式打印机色带","th":"ตลับผ้าหมึกดอทเมตริกซ์","unit":"PCS","ex":120.0,"inc":128.4,"spec":"Brand: ตลับผ้าหมึกดอทเมตริกซ์ Epson SO15639 LQ-310\nความยาว 10 เมตร\nจำนวน 1 ตลับ\nUnit / Packaging: 1 ตลับ","sup":"Officework","cat":"it"},{"code":"O1-07010238","en":"Metal Staple Remover Pliers","cn":"金属钳式起钉器","th":"ที่ถอนลวดเย็บกระดาษชนิดคีม โลหะ","unit":"PCS","ex":21.0,"inc":22.47,"spec":"Brand: ONE\nผลิตจากโลหะชุบโครเมียม แข็งแรง\nด้ามจับกระชับมือ ถอนลวดง่าย ไม่ทำให้เอกสารฉีกขาด\nเหมาะสำหรับถอนลวดเย็บเข็มเล็กและเข็มใหญ่\nถอนลวดเย็บเบอร์ : 3 (24/6) 10 (27/4.8) 35 (26/6) และ B8\nชนิด : คีม (Plier-Style)\nสี : สีเงิน\nขนาดสินค้า (กว้าง x ยาว x สูง) : 6.9 x 12 x 1.65 ซม./อัน\nน้ำหนัก : 62 กรัม\nจำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"tool"},{"code":"O1-07010239","en":"Stapler HD-10NX","cn":"订书机 HD-10NX","th":"เครื่องเย็บกระดาษ HD-10NX","unit":"PCS","ex":68.0,"inc":72.76,"spec":"Brand: Max\nเครื่องเย็บกระดาษ HD-10NX\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tool"},{"code":"O1-07010240","en":"Stapler HD-50R","cn":"订书机 HD-50R","th":"เครื่องเย็บกระดาษ HD-50R","unit":"PCS","ex":330.0,"inc":353.1,"spec":"Brand: Max\nเครื่องเย็บกระดาษ HD-50R\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"tool"},{"code":"O1-07010241","en":"ELEPHANT Stapler","cn":"ELEPHANT订书机","th":"ELEPHANT เครื่องเย็บกระดาษ","unit":"PCS","ex":425.0,"inc":454.75,"spec":"Brand: เครื่องเย็บกระดาษ ตราช้าง DS-23S13 (QL)\nบรรจุลวดเย็บ 2 แถว (50-100 เข็ม)\nเย็บกระดาษได้หนา 100 แผ่น (80 แกรม)","sup":"Officework","cat":"tool"},{"code":"O1-07010242","en":"Staples No 10-5M","cn":"订书钉 No 10-5M","th":"ลวดเย็บเบอร์ No 10-5M","unit":"BOX","ex":24.6,"inc":26.32,"spec":"Brand: DeliBrand: Deli\nDeli 100017525 DL-0010N Staples Staple - #10 1000pin/small box\n5box/big box\nUnit / Packaging: 1000pin/small box\n5box/big box","sup":"Jingdong","cat":"tool"},{"code":"O1-07010243","en":"Staples No 35-1M (26/6)","cn":"订书钉 No 35-1M (26/6)","th":"ลวดเย็บกระดาษ No 35-1M (26/6)","unit":"BOX","ex":479.0,"inc":512.53,"spec":"Brand: Deli\nDeli 100116705 DL-0012S Staples Staples - 26/6 no. 35 1000PCS/ small box\n72small box in 1 big box\n1000PCS/ small box 72small box in 1 big box\nUnit / Packaging: 1000PCS/ small box 72small box in 1 big box","sup":"Jingdong","cat":"tool"},{"code":"O1-07010244","en":"Staples No. 23/13","cn":"订书钉 No. 23/13","th":"ลวดเย็บกระดาษ No. 23/13","unit":"BOX","ex":17.0,"inc":18.19,"spec":"Brand: Deli\nDeli 100002925 DL-0013 Staples Staple - 23/13\nUnit / Packaging: BOX","sup":"Jingdong","cat":"tool"},{"code":"O1-07010245","en":"ELEPHANT Stapler","cn":"ELEPHANT订书机","th":"ELEPHANT เครื่องเย็บกระดาษ 210 แผ่น DS- 23S24 (FL) 8.5 x 38 x 27 ซม./เครื่อง","unit":"PCS","ex":830.0,"inc":888.1,"spec":"Brand: Deli\nDeli 100115793 DL-0485 Heavy Duty Stapler 210sheets\nUnit / Packaging: PCS","sup":"Jingdong","cat":"tool"},{"code":"O1-07010246","en":"Staples","cn":"订书钉","th":"ลวดเย็บกระดาษเบอร์ 23/24","unit":"PCS","ex":41.2,"inc":44.08,"spec":"Brand: Deli\nDeli 100002926 DL-0014 Staples Staple - 23/23 1000pin/small box\nUnit / Packaging: BOX","sup":"Jingdong","cat":"tool"},{"code":"O1-07010247","en":"Self-Inking Stamp PAID","cn":"回墨印章 PAID","th":"ตรายางหมึกในตัว PAID","unit":"PCS","ex":67.5,"inc":72.23,"spec":"Brand: ONE\nแท่นพลาสติกคุณภาพดีแข็งแรง คงทน จับถนัด กระชับมือ\nตรายางหมึกในตัว ประทับได้ทันทีต่อเนื่อง สมํ่าเสมอ คมชัด\nฝาครอบในตัว จัดเก็บได้ง่าย สะอาด ไม่เลอะเทอะ เมื่อไม่ใช้งาน\nเหมาะสำหรับประทับตราบนเอกสารทั่วไป\nใช้ร่วมกับหมึกเติมตรายางในตัวรุ่นทั่วไป\nชนิด : เติมหมึกได้สีหมึก : แดง รูปแบบ : อักษรภาษาอังกฤษ \"PAID\" ขนาดแสดงผล\n(กว้าง x สูง) : 4 x 1.20 ซม.\nขนาดสินค้า (กว้าง x ลึก x สูง) : 6 x 2.6 x 6.5 ซม./อัน\nจำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010248","en":"Self-Inking Stamp ORIGINAL","cn":"回墨印章 ORIGINAL","th":"ตรายางหมึกในตัว ORIGINAL","unit":"PCS","ex":67.5,"inc":72.23,"spec":"Brand: ONE\nแท่นพลาสติกคุณภาพดีแข็งแรง คงทน จับถนัด กระชับมือ * ตรายางหมึกในตัว\nประทับได้ทันทีต่อเนื่อง สมํ่าเสมอ คมชัด * ฝาครอบในตัว จัดเก็บได้ง่าย สะอาด ไม่\nเลอะเทอะ เมื่อไม่ใช้งาน * เหมาะสำหรับประทับตราบนเอกสารทั่วไป * ใช้ร่วมกับ\nหมึกเติมตรายางในตัวรุ่นทั่วไป * ชนิด : เติมหมึกได้ * สีหมึก : แดง * รูปแบบ : อักษร\nภาษาอังกฤษ \"ORIGINAL\" * ขนาดแสดงผล (กว้าง x สูง) : 4 x 1.20 ซม. * ขนาด\nสินค้า (กว้าง x ลึก x สูง) : 6 x 2.6 x 6.5 ซม./อัน * จำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010249","en":"Self-Inking Stamp COPY","cn":"回墨印章 COPY","th":"ตรายางหมึกในตัว COPY","unit":"PCS","ex":67.5,"inc":72.23,"spec":"Brand: ONE\nแท่นพลาสติกคุณภาพดีแข็งแรง คงทน จับถนัด กระชับมือ * ตรายางหมึกในตัว\nประทับได้ทันทีต่อเนื่อง สมํ่าเสมอ คมชัด * ฝาครอบในตัว จัดเก็บได้ง่าย สะอาด ไม่\nเลอะเทอะ เมื่อไม่ใช้งาน * เหมาะสำหรับประทับตราบนเอกสารทั่วไป * ใช้ร่วมกับ\nหมึกเติมตรายางในตัวรุ่นทั่วไป * ชนิด : เติมหมึกได้ * สีหมึก : แดง * รูปแบบ : อักษร\nภาษาอังกฤษ \"COPY\" * ขนาดแสดงผล (กว้าง x สูง) : 4 x 1.20 ซม. * ขนาดสินค้า\n(กว้าง x ลึก x สูง) : 6 x 2.6 x 6.5 ซม./อัน * จำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010250","en":"Self-Inking Stamp（สำเนา ถูกต้อง）","cn":"回墨印章（สำเนาถูกต้อง）","th":"ตรายางหมึกในตัว (สำเนาถูกต้อง)","unit":"PCS","ex":67.5,"inc":72.23,"spec":"Brand: ONE\nแท่นพลาสติกคุณภาพดีแข็งแรง คงทน จับถนัด กระชับมือ * ตรายางหมึกในตัว\nประทับได้ทันทีต่อเนื่อง สมํ่าเสมอ คมชัด * ฝาครอบในตัว จัดเก็บได้ง่าย สะอาด ไม่\nเลอะเทอะ เมื่อไม่ใช้งาน * เหมาะสำหรับประทับตราบนเอกสารทั่วไป * ใช้ร่วมกับ\nหมึกเติมตรายางในตัวรุ่นทั่วไป * ชนิด : เติมหมึกได้ * สีหมึก : แดง * รูปแบบ : อักษร\nภาษาไทย \"สำเนาถูกต้อง\" * ขนาดแสดงผล (กว้าง x สูง) : 4 x 1.20 ซม. * ขนาดสินค้า\n(กว้าง x ลึก x สูง) : 6 x 2.6 x 6.5 ซม./อัน * จำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010251","en":"Self-Inking Stamp （ลง บัญชีแล้ว）","cn":"回墨印章（ลงบัญชีแล้ว）","th":"ตรายางหมึกในตัว ลงบัญชีแล้ว","unit":"PCS","ex":67.5,"inc":72.23,"spec":"Brand: ONE\nแท่นพลาสติกคุณภาพดีแข็งแรง คงทน จับถนัด กระชับมือ * ตรายางหมึกในตัว\nประทับได้ทันทีต่อเนื่อง สมํ่าเสมอ คมชัด * ฝาครอบในตัว จัดเก็บได้ง่าย สะอาด ไม่\nเลอะเทอะ เมื่อไม่ใช้งาน * เหมาะสำหรับประทับตราบนเอกสารทั่วไป * ใช้ร่วมกับ\nหมึกเติมตรายางในตัวรุ่นทั่วไป * ชนิด : เติมหมึกได้ * สีหมึก : แดง * รูปแบบ : อักษร\nภาษาไทย \"ลงบัญชีแล้ว\" * ขนาดแสดงผล (กว้าง x สูง) : 4 x 1.20 ซม. * ขนาดสินค้า\n(กว้าง x ลึก x สูง) : 6 x 2.6 x 6.5 ซม./อัน * จำนวน 1 อัน\nUnit / Packaging: Piece","sup":"Officemate","cat":"write"},{"code":"O1-07010252","en":"Date Stamp","cn":"日期印章","th":"ตรายางวันที่ 3.8 มม. อังกฤษ น้ำเงิน","unit":"PCS","ex":78.0,"inc":83.46,"spec":"Brand: A-Line\nตรายางหมึกในตัวข้อความ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010253","en":"Self-Inking Stamp (Urgent)","cn":"订书机 210张 DS-23S24 (FL)","th":"ตรายางหมึกในตัว (Urgent)","unit":"PCS","ex":86.0,"inc":92.02,"spec":"Brand: Sanby\nตรายางหมึกในตัวข้อความ\nUnit / Packaging: 1 Pc","sup":"Bangplee","cat":"write"},{"code":"O1-07010254","en":"Cash Bill Book","cn":"现金收据本","th":"บิลเงินสด คาร์บอนในตัว เนื้อกระดาษ : 56 แกรม ชนิดกระดาษ : คาร์บอนในตัว","unit":"EA","ex":22.5,"inc":24.08,"spec":"Brand: Elephant\nบิลเงินสด ประเภท 2 ชั้น มีคาร์บอนในตัว ตราช้าง No.3\n100 × 165 mm\nUnit / Packaging: Book","sup":"Jingdong","cat":"note"},{"code":"O1-07010255","en":"Corrugated Plastic Sheet","cn":"中空塑料板","th":"แผ่นพลาสติกลูกฟูก (ฟิวเจอร์บอร์ด)","unit":"PCS","ex":26.0,"inc":27.82,"spec":"Brand: ไม่มีแบรนด์\nฟิวเจอร์บอร์ด\nUnit / Packaging: 1 Sheet","sup":"Bangplee","cat":"paper"},{"code":"O1-07010256","en":"Single-Sided Colored Cardstock","cn":"单面硬质彩色纸，尺寸：52 ×77 厘米，克重：350 克/平方米","th":"กระดาษสีแข็งหน้าเดียว ขนาด 52x77 ซม. หนา 350 แกรม","unit":"PACK","ex":114.0,"inc":121.98,"spec":"กระดาษสีแข็งหน้าเดียว ขนาด 52x77 ซม. หนา 350 แกรม\nUnit / Packaging: 1 Pack 12pc.","sup":"Bangplee","cat":"paper"}]</script>
+<script>
+(() => {
+const CATALOG = JSON.parse(document.getElementById('data').textContent);
+let ITEMS = CATALOG.map(x => ({...x}));
+let BY = Object.fromEntries(ITEMS.map(x => [x.code, x]));
+let STOCK = {};           // code -> {onHand,min,max,location,active}
+let seeded = false, stockLoaded = false;
+const CATS = [
+  ['', 'ทั้งหมด'], ['paper', 'กระดาษ'], ['write', 'เครื่องเขียน / ตรายาง'], ['file', 'แฟ้ม ซอง กล่องเอกสาร'],
+  ['tape', 'เทป / กาว'], ['tool', 'อุปกรณ์สำนักงาน'], ['note', 'สมุด / Post-it'], ['sign', 'ป้าย / ไวท์บอร์ด'], ['it', 'ไอที / ไฟฟ้า / หมึก']
+];
+const CATNAME = Object.fromEntries(CATS);
+const ST = {pending:'รออนุมัติ', approved:'อนุมัติแล้ว', issued:'จ่ายของแล้ว', rejected:'ไม่อนุมัติ', cancelled:'ยกเลิก'};
+const TT = {IN:'รับเข้า', OUT:'จ่ายออก', ADJ:'ปรับยอด'};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n0 = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+const baht = n => n0(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2});
+const int = n => n0(n).toLocaleString('th-TH');
+const fmtDate = iso => { if (!iso) return '-'; const d = new Date(iso); if (isNaN(d)) return iso; return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}) + ' ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}); };
+const fmtDay = s => { if (!s) return '-'; const d = new Date(s + 'T00:00'); return isNaN(d) ? s : d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}); };
+const monthLabel = k => { const [y, m] = k.split('-'); return new Date(+y, +m - 1, 1).toLocaleDateString('th-TH', {month:'short', year:'2-digit'}); };
+const thisMonth = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+const localMonth = iso => { const d = new Date(iso); return isNaN(d) ? String(iso).slice(0, 7) : d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+const img = c => 'img/' + encodeURIComponent(c) + '.jpg';
+const ls = { get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+             set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const ss = { get(k){ try { return JSON.parse(sessionStorage.getItem(k)); } catch { return null; } }, set(k, v){ try { sessionStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2800); }
+
+/* ---------- API ---------- */
+const DEMO = !API_URL;
+function localStore(){
+  const key = n => 'srdemo_' + n;
+  const cache = {};
+  return {
+    all(n){ if (!cache[n]) { cache[n] = ls.get(key(n), []); cache[n].forEach((r, i) => r._row = i); } return cache[n]; },
+    append(n, rows){ const a = this.all(n); rows.forEach(r => { const o = {...r, _row: a.length}; a.push(o); }); ls.set(key(n), a); },
+    update(n, obj, patch){ Object.assign(obj, patch); ls.set(key(n), this.all(n)); },
+    pin(){ return '1234'; }
+  };
+}
+async function api(action, payload = {}){
+  const adm = ss.get('sr_admin');
+  if (adm && !payload.pin) payload = {...payload, pin: adm.pin, by: payload.by || adm.by};
+  if (DEMO) {
+    await new Promise(r => setTimeout(r, 120));
+    return srCore(localStore())(action, JSON.parse(JSON.stringify(payload)));
+  }
+  let res;
+  try { res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action, payload})}); }
+  catch (e) { throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ต'); }
+  const j = await res.json().catch(() => ({ok:false, error:'เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง'}));
+  if (!j.ok) throw new Error(j.error || 'เกิดข้อผิดพลาด');
+  return j.data;
+}
+
+/* ---------- download helpers ---------- */
+const csvCell = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+function downloadCSV(name, rows){
+  const blob = new Blob(['﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+const today = () => new Date().toISOString().slice(0, 10);
+
+/* ---------- catalog ---------- */
+let cart = ls.get('sr_cart', {}), cat = '', q = '', sort = '';
+function applyServerItems(list){
+  STOCK = {};
+  list.forEach(s => {
+    STOCK[s.code] = s;
+    if (!BY[s.code]) { const x = {code:s.code, th:s.th, en:s.en, cn:'', unit:s.unit, ex:s.priceEx, inc:s.priceInc, sup:s.supplier, spec:'', cat:'tool', noimg:true}; ITEMS.push(x); BY[s.code] = x; }
+    else { const x = BY[s.code]; if (s.priceInc) { x.inc = s.priceInc; x.ex = s.priceEx; } if (s.supplier) x.sup = s.supplier; }
+  });
+  stockLoaded = true;
+}
+const active = x => !stockLoaded || !STOCK[x.code] || STOCK[x.code].active !== false;
+function stockBadge(code){
+  if (!seeded || !STOCK[code]) return '';
+  const s = STOCK[code];
+  if (s.onHand <= 0) return `<div class="stock s-out">● หมดคลัง – รอสั่งซื้อ</div>`;
+  if (s.min > 0 && s.onHand <= s.min) return `<div class="stock s-low">● คงเหลือ ${int(s.onHand)} (ใกล้หมด)</div>`;
+  return `<div class="stock s-ok">● คงเหลือ ${int(s.onHand)}</div>`;
+}
+function renderChips(){
+  const c = {'': 0}; ITEMS.filter(active).forEach(x => { c[''] ++; c[x.cat] = (c[x.cat] || 0) + 1; });
+  $('#chips').innerHTML = CATS.map(([k, l]) => `<button class="chip ${k===cat?'on':''}" data-c="${k}">${l}<b>${c[k]||0}</b></button>`).join('');
+}
+function search(list, text, fields){
+  const words = text.toLowerCase().split(/\s+/).filter(Boolean);
+  return list.filter(x => words.every(w => fields(x).toLowerCase().includes(w)));
+}
+function filtered(){
+  let r = search(ITEMS.filter(x => active(x) && (!cat || x.cat === cat)), q, x => x.th+' '+x.en+' '+x.cn+' '+x.code+' '+x.spec);
+  if (sort === 'pa') r = [...r].sort((a,b) => a.inc - b.inc);
+  if (sort === 'pd') r = [...r].sort((a,b) => b.inc - a.inc);
+  if (sort === 'nm') r = [...r].sort((a,b) => (a.th||a.en).localeCompare(b.th||b.en, 'th'));
+  if (sort === 'st') r = [...r].sort((a,b) => n0(STOCK[b.code] && STOCK[b.code].onHand > 0) - n0(STOCK[a.code] && STOCK[a.code].onHand > 0));
+  return r;
+}
+function qtyCtl(code){
+  const n = cart[code] || 0;
+  if (!n) return `<button class="add" data-add="${code}">+ เพิ่ม</button>`;
+  return `<div class="step"><button data-dec="${code}">−</button><input type="number" min="0" value="${n}" data-qty="${code}"><button data-inc="${code}">+</button></div>`;
+}
+const picTag = (x, cls='') => x.noimg ? `<div style="font-size:40px;color:#c3cbe0">📦</div>` : `<img loading="lazy" src="${img(x.code)}" alt="" ${cls}>`;
+function renderGrid(){
+  const r = filtered();
+  $('#count').textContent = `พบ ${r.length} รายการ`;
+  $('#grid').innerHTML = r.length ? r.map(x => `
+    <div class="item" data-code="${x.code}">
+      <div class="pic" data-detail="${x.code}">${picTag(x)}</div>
+      <div class="body">
+        <div class="th" data-detail="${x.code}">${esc(x.th || x.en)}</div>
+        <div class="en">${esc(x.en)}</div>
+        <div class="code">${x.code} · ${esc(x.unit)}</div>
+        ${stockBadge(x.code)}
+        <div class="row">
+          <div class="price">฿${baht(x.inc)}<br><small>ต่อ ${esc(x.unit)} (รวม VAT)</small></div>
+          <div class="qc">${qtyCtl(x.code)}</div>
+        </div>
+      </div>
+    </div>`).join('') : `<div class="empty" style="grid-column:1/-1">ไม่พบสินค้าที่ค้นหา</div>`;
+}
+function refreshQty(code){
+  document.querySelectorAll(`.item[data-code="${CSS.escape(code)}"] .qc, .qc[data-code="${CSS.escape(code)}"]`).forEach(el => el.innerHTML = qtyCtl(code));
+}
+function setQty(code, n){
+  n = Math.max(0, Math.min(9999, Math.floor(Number(n) || 0)));
+  if (n) cart[code] = n; else delete cart[code];
+  ls.set('sr_cart', cart); refreshQty(code); renderCart();
+}
+function showDetail(code){
+  const x = BY[code], s = STOCK[code];
+  $('#mbox').innerHTML = `<button class="x" data-mclose>×</button>
+    <div class="detail">
+      <div class="big">${picTag(x)}</div>
+      <div>
+        <h3>${esc(x.th || x.en)}</h3>
+        <div class="en">${esc(x.en)}</div>
+        ${x.cn ? `<div class="cn">${esc(x.cn)}</div>` : ''}
+        <dl class="kv">
+          <dt>รหัสสินค้า</dt><dd class="mono">${x.code}</dd>
+          <dt>หน่วย</dt><dd>${esc(x.unit)}</dd>
+          <dt>ราคา (ไม่รวม VAT)</dt><dd>฿${baht(x.ex)}</dd>
+          <dt>ราคา (รวม VAT)</dt><dd style="color:var(--brand);font-size:19px">฿${baht(x.inc)}</dd>
+          <dt>Supplier</dt><dd>${esc(x.sup || '-')}</dd>
+          ${seeded && s ? `<dt>คงเหลือในคลัง</dt><dd>${int(s.onHand)} ${esc(x.unit)}${s.location ? ' · ที่เก็บ ' + esc(s.location) : ''}</dd>` : ''}
+        </dl>
+        ${x.spec ? `<div class="spec">${esc(x.spec)}</div>` : ''}
+        <div class="acts" style="margin-top:16px"><span class="qc" data-code="${x.code}">${qtyCtl(x.code)}</span></div>
+      </div>
+    </div>`;
+  openModal();
+}
+function openModal(){ $('#modal').classList.add('on'); }
+function closeModal(){ $('#modal').classList.remove('on'); }
+
+/* ---------- cart ---------- */
+function cartLines(){ return Object.entries(cart).filter(([c]) => BY[c]).map(([c, n]) => ({x: BY[c], n})); }
+function renderCart(){
+  const L = cartLines();
+  $('#cartN').textContent = L.length;
+  $('#lines').innerHTML = L.length ? L.map(({x, n}) => {
+    const s = STOCK[x.code], warn = seeded && s && n > s.onHand ? `<div class="s" style="color:var(--warn)">คลังมี ${int(s.onHand)} – อาจต้องรอสั่งซื้อ</div>` : '';
+    return `<div class="line">
+      ${x.noimg ? '<div style="font-size:30px;text-align:center">📦</div>' : `<img src="${img(x.code)}" alt="">`}
+      <div><div class="t">${esc(x.th || x.en)}</div><div class="s">${x.code} · ฿${baht(x.inc)} / ${esc(x.unit)}</div>${warn}</div>
+      <div class="r"><div class="step"><button data-dec="${x.code}">−</button><input type="number" min="0" value="${n}" data-qty="${x.code}"><button data-inc="${x.code}">+</button></div>
+        <div class="amt">฿${baht(x.inc * n)}</div><button class="rm" data-rm="${x.code}">ลบ</button></div>
+    </div>`; }).join('') : `<div class="empty">ยังไม่มีสินค้าในตะกร้า<br><span style="font-size:15px">เลือกสินค้าจากแคตตาล็อกแล้วกด “+ เพิ่ม”</span></div>`;
+  const ex = L.reduce((s, l) => s + l.x.ex * l.n, 0), inc = L.reduce((s, l) => s + l.x.inc * l.n, 0);
+  $('#tot').innerHTML = `<div><span>${L.length} รายการ</span><span>ไม่รวม VAT ฿${baht(ex)}</span></div><div class="big"><span>รวม VAT 7%</span><span>฿${baht(inc)}</span></div>`;
+  $('#tot').classList.toggle('hide', !L.length);
+  $('#submit').disabled = !L.length;
+}
+function openCart(){ fillProfile(); $('#drawer').classList.add('on'); $('#scrim').classList.add('on'); }
+function closeCart(){ $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
+function fillProfile(){
+  const p = ls.get('sr_profile', {}), f = $('#reqForm');
+  ['name','empId','dept','cc','tel'].forEach(k => { if (p[k] && !f[k].value) f[k].value = p[k]; });
+}
+async function submit(){
+  const f = $('#reqForm'), err = $('#formErr'); err.textContent = '';
+  const L = cartLines(); if (!L.length) return;
+  if (!f.reportValidity()) { err.textContent = 'กรุณากรอกข้อมูลที่มี * ให้ครบ'; return; }
+  const v = k => f[k].value.trim();
+  const p = {name:v('name'), empId:v('empId'), dept:v('dept'), cc:v('cc'), tel:v('tel'), need:v('need'), purpose:v('purpose'), lines: L.map(l => ({code:l.x.code, qty:l.n}))};
+  ls.set('sr_profile', {name:p.name, empId:p.empId, dept:p.dept, cc:p.cc, tel:p.tel});
+  const b = $('#submit'); b.disabled = true; b.innerHTML = '<span class="spin"></span> กำลังส่ง…';
+  try {
+    const r = await api('submit', p);
+    cart = {}; ls.set('sr_cart', cart); f.need.value = ''; f.purpose.value = '';
+    renderCart(); renderGrid(); closeCart();
+    $('#mineEmp').value = p.empId;
+    $('#mbox').innerHTML = `<div class="done"><div class="big">✅</div><h3>ส่งคำขอเบิกเรียบร้อย</h3>
+      <div style="color:var(--mute)">เลขที่คำขอ</div><div class="no">${esc(r.id)}</div>
+      <div style="color:var(--mute);margin-bottom:18px">${p.lines.length} รายการ · ยอดรวม ฿${baht(r.totalInc)} (รวม VAT) · สถานะ: รออนุมัติ</div>
+      <div class="acts" style="justify-content:center"><button class="btn pri" style="flex:0" data-goto="mine">ดูคำขอของฉัน</button></div></div>`;
+    openModal();
+  } catch (e) { err.textContent = 'ส่งไม่สำเร็จ: ' + e.message; }
+  finally { b.textContent = 'ส่งคำขอเบิก'; renderCart(); }
+}
+
+/* ---------- shared request rendering ---------- */
+function itemsTable(r, issueMode){
+  const showIssued = r.status === 'issued';
+  return `<table class="t ${issueMode ? 'issue' : ''}"><thead><tr><th>#</th><th>รหัส</th><th>รายการ</th><th class="n">ขอ</th>${showIssued ? '<th class="n">จ่ายจริง</th>' : ''}${issueMode ? '<th class="n">คงเหลือคลัง</th><th class="n">จ่าย</th>' : ''}<th>หน่วย</th><th class="n">ราคา/หน่วย</th><th class="n">รวม (VAT)</th></tr></thead><tbody>
+    ${r.lines.map((i, k) => { const oh = STOCK[i.code] ? STOCK[i.code].onHand : 0; return `<tr><td>${k+1}</td><td class="mono">${esc(i.code)}</td><td>${esc(i.th || i.en)}</td><td class="n"><b>${int(i.qty)}</b></td>
+      ${showIssued ? `<td class="n"><b>${int(i.issuedQty)}</b></td>` : ''}
+      ${issueMode ? `<td class="n ${oh < n0(i.qty) ? 's-out' : ''}">${int(oh)}</td><td class="n"><input class="ni" type="number" min="0" max="${oh}" value="${Math.min(n0(i.qty), Math.max(0, oh))}" data-iss="${esc(i.code)}"></td>` : ''}
+      <td>${esc(i.unit)}</td><td class="n">${baht(i.priceInc)}</td><td class="n">${baht(n0(i.priceInc) * n0(i.qty))}</td></tr>`; }).join('')}
+    <tr><td colspan="${6 + (showIssued ? 1 : 0) + (issueMode ? 2 : 0)}" class="n"><b>รวมทั้งสิ้น (รวม VAT)</b></td><td class="n"><b>฿${baht(r.totalInc)}</b></td></tr></tbody></table>`;
+}
+function reqInfo(r){
+  const k = (l, v) => v ? `<span>${l}: <b style="color:var(--ink)">${esc(v)}</b></span>` : '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px 22px;font-size:15px;color:var(--mute);margin-bottom:10px">
+    ${k('รหัสพนักงาน', r.empId)}${k('แผนก', r.dept)}${k('Cost center', r.cc)}${r.need ? k('ต้องการใช้', fmtDay(r.need)) : ''}${k('โทร', r.tel)}</div>
+    ${r.purpose ? `<div class="note" style="margin:0 0 10px">วัตถุประสงค์: ${esc(r.purpose)}</div>` : ''}`;
+}
+const statusLine = r => (r.note || r.actionBy) ? `<div class="note">${r.actionBy ? '👤 ' + esc(r.actionBy) + ' · ' + fmtDate(r.actionAt) : ''}${r.note ? '<br>💬 ' + esc(r.note) : ''}</div>` : '';
+function formHTML(r){
+  const rows = r.lines.map((i, k) => `<tr><td class="c">${k+1}</td><td>${esc(i.code)}</td><td>${esc(i.th || i.en)}<br><small>${esc(i.en)}</small></td><td class="c"><b>${int(i.qty)}</b></td><td class="c">${i.issuedQty !== '' && i.issuedQty != null ? int(i.issuedQty) : ''}</td><td class="c">${esc(i.unit)}</td><td class="r">${baht(i.priceInc)}</td><td class="r">${baht(n0(i.priceInc)*n0(i.qty))}</td></tr>`).join('');
+  return `<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><title>ใบขอเบิกเครื่องเขียน ${esc(r.id)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>@page{size:A4;margin:14mm}body{font-family:Sarabun,Tahoma,sans-serif;font-size:15px;color:#000;max-width:780px;margin:20px auto}
+h1{font-size:22px;margin:0}h2{font-size:15px;font-weight:400;margin:2px 0 14px}.top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}
+.no{font-size:17px;font-weight:700;border:1.5px solid #000;padding:4px 10px}.info{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;padding:5px 7px;vertical-align:top}th{background:#eee}td.c{text-align:center}td.r{text-align:right}small{color:#444}
+.sig{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:44px;text-align:center;font-size:14px}.sig div{border-top:1px dotted #000;padding-top:6px}
+.pb{text-align:right;margin-bottom:10px}.pb button{font:inherit;padding:8px 18px;cursor:pointer}@media print{.pb{display:none}}</style></head><body>
+<div class="pb"><button onclick="window.print()">🖨 พิมพ์ / บันทึกเป็น PDF</button></div>
+<div class="top"><div><h1>ใบขอเบิกเครื่องเขียน / Stationery Requisition</h1><h2>Changan Rayong Plant</h2></div><div class="no">${esc(r.id)}</div></div>
+<div class="info"><div><b>ผู้ขอเบิก:</b> ${esc(r.name)}</div><div><b>รหัสพนักงาน:</b> ${esc(r.empId)}</div>
+<div><b>แผนก:</b> ${esc(r.dept)}</div><div><b>Cost center:</b> ${esc(r.cc || '-')}</div>
+<div><b>วันที่ขอ:</b> ${fmtDate(r.at)}</div><div><b>วันที่ต้องการใช้:</b> ${fmtDay(r.need)}</div>
+<div><b>สถานะ:</b> ${ST[r.status] || r.status}${r.actionBy ? ' (' + esc(r.actionBy) + ')' : ''}</div><div><b>เบอร์ติดต่อ:</b> ${esc(r.tel || '-')}</div>
+<div style="grid-column:1/-1"><b>วัตถุประสงค์:</b> ${esc(r.purpose || '-')}</div></div>
+<table><thead><tr><th>#</th><th>รหัสสินค้า</th><th>รายการ</th><th>จำนวนขอ</th><th>จ่ายจริง</th><th>หน่วย</th><th>ราคา/หน่วย<br>(รวม VAT)</th><th>รวม (บาท)</th></tr></thead>
+<tbody>${rows}<tr><td colspan="7" class="r"><b>ยอดรวมทั้งสิ้น (รวม VAT 7%)</b></td><td class="r"><b>${baht(r.totalInc)}</b></td></tr></tbody></table>
+<div class="sig"><div>ผู้ขอเบิก<br><br>วันที่ ....../....../......</div><div>หัวหน้าแผนก<br><br>วันที่ ....../....../......</div><div>ผู้อนุมัติ<br><br>วันที่ ....../....../......</div><div>ผู้จ่ายของ / ผู้รับของ<br><br>วันที่ ....../....../......</div></div>
+</body></html>`;
+}
+function openForm(r){
+  const url = URL.createObjectURL(new Blob([formHTML(r)], {type:'text/html;charset=utf-8'}));
+  const w = window.open(url, '_blank');
+  if (!w) { const a = document.createElement('a'); a.href = url; a.download = `ใบขอเบิก-${r.id}.html`; a.click(); }
+}
+
+/* ---------- my requests ---------- */
+let myReqs = [];
+async function loadMine(){
+  const emp = $('#mineEmp').value.trim(), el = $('#mineList');
+  if (!emp) { el.innerHTML = `<div class="empty">ใส่รหัสพนักงานเพื่อดูสถานะคำขอ</div>`; return; }
+  ls.set('sr_profile', {...ls.get('sr_profile', {}), empId: emp});
+  el.innerHTML = `<div class="loading"><span class="spin"></span> กำลังโหลด…</div>`;
+  try { myReqs = (await api('myRequests', {empId: emp})).requests; renderMine(); }
+  catch (e) { el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; }
+}
+function renderMine(){
+  const el = $('#mineList');
+  if (!myReqs.length) { el.innerHTML = `<div class="empty">ไม่พบคำขอของรหัสนี้<br><button class="btn pri" style="flex:0;margin-top:14px" data-goto="catalog">ไปเลือกสินค้า</button></div>`; return; }
+  el.innerHTML = myReqs.map(r => `
+    <div class="rq" data-rid="${esc(r.id)}">
+      <div class="rqh" data-toggle>
+        <div><div class="no">${esc(r.id)}</div><div class="meta">${fmtDate(r.at)} · ${r.lines.length} รายการ</div></div>
+        <div class="rqr"><span class="amt">฿${baht(r.totalInc)}</span><span class="badge b-${r.status}">${ST[r.status] || r.status}</span></div>
+      </div>
+      <div class="rqb">${reqInfo(r)}${itemsTable(r)}${statusLine(r)}
+        <div class="acts"><button class="btn sec sm" data-form="${esc(r.id)}">🖨 ใบขอเบิก</button>
+        <button class="btn sec sm" data-again="${esc(r.id)}">↻ ขอเบิกซ้ำ</button>
+        ${r.status === 'pending' ? `<button class="btn bad sm" data-cancel="${esc(r.id)}">ยกเลิกคำขอ</button>` : ''}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ---------- admin ---------- */
+let adminReqs = [], reqCounts = {}, sub = 'req';
+const admin = () => ss.get('sr_admin');
+async function login(){
+  const f = $('#loginForm'), err = $('#loginErr'); err.textContent = '';
+  if (!f.reportValidity()) return;
+  try { await api('checkPin', {pin: f.pin.value.trim(), by: f.by.value.trim()}); ss.set('sr_admin', {pin: f.pin.value.trim(), by: f.by.value.trim()}); ls.set('sr_adminName', f.by.value.trim()); f.pin.value = ''; showAdmin(); }
+  catch (e) { err.textContent = e.message; }
+}
+function showAdmin(){
+  const a = admin();
+  $('#adminLogin').classList.toggle('hide', !!a); $('#adminApp').classList.toggle('hide', !a);
+  if (!a) { $('#loginForm').by.value = ls.get('sr_adminName', ''); return; }
+  $('#adminName').textContent = a.by;
+  renderSeed(); loadReqs(); renderStock();
+}
+function renderSeed(){
+  const box = $('#seedBox');
+  if (seeded || !stockLoaded) { box.classList.add('hide'); return; }
+  box.classList.remove('hide');
+  box.innerHTML = `<h3>เริ่มต้นใช้งาน: ยังไม่มีรายการสินค้าในฐานข้อมูล</h3>
+    <p style="margin:0 0 12px;color:var(--mute)">กดปุ่มด้านล่างเพื่อนำเข้าสินค้า ${CATALOG.length} รายการจาก Stationery Catalog (ยอดคงเหลือเริ่มต้น = 0) จากนั้นใช้หน้า “ตรวจนับ” บันทึกยอดยกมา และตั้ง Min/Max ในหน้า “Stock คงเหลือ”</p>
+    <button class="btn pri" style="flex:0" id="seedBtn">นำเข้า Catalog ${CATALOG.length} รายการ</button>`;
+}
+async function seed(){
+  const b = $('#seedBtn'); b.disabled = true; b.innerHTML = '<span class="spin"></span> กำลังนำเข้า…';
+  try { const r = await api('seed', {items: CATALOG.map(x => ({code:x.code, th:x.th, en:x.en, cn:x.cn, unit:x.unit, cat:x.cat, ex:x.ex, inc:x.inc, sup:x.sup}))}); toast(`นำเข้า ${r.count} รายการแล้ว`); await loadInit(); renderSeed(); }
+  catch (e) { toast('นำเข้าไม่สำเร็จ: ' + e.message); b.disabled = false; b.textContent = 'ลองอีกครั้ง'; }
+}
+async function loadInit(){
+  try {
+    const r = await api('init');
+    seeded = r.seeded; applyServerItems(r.items);
+    $('#deptList').innerHTML = r.depts.map(d => `<option value="${esc(d)}">`).join('');
+    renderChips(); renderGrid(); renderCart();
+    if (admin()) { renderStock(); renderCount(); renderReorder(); renderSeed(); }
+  } catch (e) {
+    const b = $('#banner'); b.textContent = 'โหลดข้อมูล stock ไม่สำเร็จ: ' + e.message; b.style.display = 'block';
+  }
+}
+
+/* requests */
+async function loadReqs(){
+  const el = $('#adminList');
+  el.innerHTML = `<div class="loading"><span class="spin"></span> กำลังโหลด…</div>`;
+  try {
+    const r = await api('requests', {status: $('#fStatus').value, month: $('#fMonth').value});
+    adminReqs = r.requests; reqCounts = r.counts || {}; renderReqs();
+  } catch (e) { el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; if (/PIN/.test(e.message)) logout(); }
+}
+function renderReqs(){
+  const c = reqCounts;
+  $('#pendN').textContent = c.pending || 0; $('#pendN').classList.toggle('hide', !c.pending);
+  $('#reqStats').innerHTML = [['รออนุมัติ', c.pending||0, 'var(--warn)', 'pending'], ['อนุมัติแล้ว รอจ่ายของ', c.approved||0, 'var(--brand)', 'approved'], ['จ่ายของแล้ว', c.issued||0, 'var(--ok)', 'issued'], ['ไม่อนุมัติ / ยกเลิก', (c.rejected||0) + (c.cancelled||0), 'var(--mute)', 'rejected']]
+    .map(([k, v, col, s]) => `<div class="stat" style="cursor:pointer" data-fs="${s}"><div class="k">${k}</div><div class="v" style="color:${col}">${v}</div></div>`).join('');
+  const fq = $('#fq').value.trim();
+  const rows = fq ? search(adminReqs, fq, r => [r.id, r.name, r.dept, r.cc, r.empId].join(' ')) : adminReqs;
+  $('#adminList').innerHTML = rows.length ? rows.map(r => `
+    <div class="rq" data-rid="${esc(r.id)}">
+      <div class="rqh" data-toggle>
+        <div><div><span class="no">${esc(r.id)}</span> &nbsp;<span class="who">${esc(r.name)}</span> · ${esc(r.dept)}</div>
+          <div class="meta">${fmtDate(r.at)} · ${r.lines.length} รายการ${r.need ? ' · ต้องการใช้ ' + fmtDay(r.need) : ''}</div></div>
+        <div class="rqr"><span class="amt">฿${baht(r.totalInc)}</span><span class="badge b-${r.status}">${ST[r.status] || r.status}</span></div>
+      </div>
+      <div class="rqb">${reqInfo(r)}${itemsTable(r, r.status === 'approved')}${statusLine(r)}
+        <div class="acts">
+          ${['pending','approved'].includes(r.status) ? `<input placeholder="หมายเหตุถึงผู้ขอ (ถ้ามี)" data-note>` : ''}
+          ${r.status === 'pending' ? `<button class="btn ok sm" data-set="approved">✓ อนุมัติ</button><button class="btn bad sm" data-set="rejected">✕ ไม่อนุมัติ</button>` : ''}
+          ${r.status === 'approved' ? `<button class="btn ok sm" data-issue>📦 จ่ายของ (ตัด stock)</button><button class="btn sec sm" data-set="pending">↩ กลับเป็นรออนุมัติ</button>` : ''}
+          ${r.status === 'rejected' ? `<button class="btn sec sm" data-set="pending">↩ กลับเป็นรออนุมัติ</button>` : ''}
+          <button class="btn sec sm" data-form="${esc(r.id)}">🖨 ใบขอเบิก</button>
+        </div>
+      </div>
+    </div>`).join('') : `<div class="empty">ไม่มีคำขอในเงื่อนไขนี้</div>`;
+}
+function exportReqs(){
+  const rows = [['เลขที่คำขอ','วันที่ขอ','สถานะ','ชื่อผู้ขอ','รหัสพนักงาน','แผนก','Cost center','วันที่ต้องการใช้','วัตถุประสงค์','รหัสสินค้า','รายการ','จำนวนขอ','จ่ายจริง','หน่วย','ราคา/หน่วย รวม VAT','รวม รวม VAT','Supplier','ผู้ดำเนินการ','หมายเหตุ']];
+  adminReqs.forEach(r => r.lines.forEach(i => rows.push([r.id, fmtDate(r.at), ST[r.status], r.name, r.empId, r.dept, r.cc, r.need, r.purpose, i.code, i.th, i.qty, i.issuedQty, i.unit, i.priceInc, (n0(i.priceInc)*n0(i.qty)).toFixed(2), i.supplier, r.actionBy, r.note])));
+  downloadCSV(`คำขอเบิก-${today()}.csv`, rows);
+}
+
+/* stock */
+let mmChanges = {};
+function stockRows(){
+  const qq = $('#sq').value, c = $('#sCat').value, f = $('#sFilter').value;
+  return search(ITEMS.filter(x => STOCK[x.code] && (!c || x.cat === c)), qq, x => x.th+' '+x.en+' '+x.code+' '+(STOCK[x.code].location||''))
+    .filter(x => { const s = STOCK[x.code];
+      return !f || (f === 'low' && s.min > 0 && s.onHand <= s.min) || (f === 'out' && s.onHand <= 0) || (f === 'has' && s.onHand > 0) || (f === 'nomin' && !s.min && !s.max); });
+}
+function renderStock(){
+  if (!stockLoaded) return;
+  const all = ITEMS.filter(x => STOCK[x.code]);
+  const low = all.filter(x => STOCK[x.code].min > 0 && STOCK[x.code].onHand <= STOCK[x.code].min).length;
+  const out = all.filter(x => STOCK[x.code].onHand <= 0).length;
+  const val = all.reduce((s, x) => s + Math.max(0, STOCK[x.code].onHand) * x.inc, 0);
+  $('#stockStats').innerHTML = [['รายการสินค้า', int(all.length), 'var(--ink)'], ['ถึงจุดสั่งซื้อ', int(low), 'var(--warn)'], ['หมดคลัง', int(out), 'var(--bad)'], ['มูลค่าคงคลัง (รวม VAT)', '฿' + baht(val), 'var(--brand)']]
+    .map(([k, v, col]) => `<div class="stat"><div class="k">${k}</div><div class="v" style="color:${col}">${v}</div></div>`).join('');
+  const rows = stockRows();
+  $('#stockTbl').innerHTML = `<thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th>ที่เก็บ</th><th class="n">คงเหลือ</th><th class="n">Min</th><th class="n">Max</th><th>สถานะ</th><th class="n">มูลค่า</th></tr></thead><tbody>` +
+    rows.map(x => { const s = STOCK[x.code], ch = mmChanges[x.code] || {};
+      const st = s.onHand <= 0 ? '<span class="s-out">หมด</span>' : (s.min > 0 && s.onHand <= s.min ? '<span class="s-low">ต้องสั่ง</span>' : '<span class="s-ok">ปกติ</span>');
+      const v = k => ch[k] !== undefined ? ch[k] : (k === 'location' ? s.location : (s[k] || ''));
+      return `<tr class="${s.onHand <= 0 ? 'out' : (s.min > 0 && s.onHand <= s.min ? 'low' : '')}"><td class="mono">${x.code}</td><td>${esc(x.th || x.en)}<div style="font-size:13px;color:var(--mute)">${esc(x.sup || '')}</div></td><td>${esc(x.unit)}</td>
+        <td><input class="ti ${ch.location !== undefined ? 'changed' : ''}" data-mm="location" data-code="${x.code}" value="${esc(v('location'))}"></td>
+        <td class="n"><b style="font-size:18px">${int(s.onHand)}</b></td>
+        <td class="n"><input class="ni ${ch.min !== undefined ? 'changed' : ''}" type="number" min="0" data-mm="min" data-code="${x.code}" value="${v('min')}"></td>
+        <td class="n"><input class="ni ${ch.max !== undefined ? 'changed' : ''}" type="number" min="0" data-mm="max" data-code="${x.code}" value="${v('max')}"></td>
+        <td>${st}</td><td class="n">${baht(Math.max(0, s.onHand) * x.inc)}</td></tr>`; }).join('') + `</tbody>`;
+  $('#saveMM').disabled = !Object.keys(mmChanges).length;
+  $('#saveMM').textContent = Object.keys(mmChanges).length ? `บันทึก (${Object.keys(mmChanges).length} รายการ)` : 'บันทึก Min/Max';
+}
+async function saveMM(){
+  const changes = Object.entries(mmChanges).map(([code, c]) => ({code, ...c}));
+  const bad = changes.find(c => { const s = STOCK[c.code], mn = c.min !== undefined ? n0(c.min) : s.min, mx = c.max !== undefined ? n0(c.max) : s.max; return mx && mn > mx; });
+  if (bad) { toast('Min ต้องไม่มากกว่า Max: ' + (BY[bad.code].th || bad.code)); return; }
+  const b = $('#saveMM'); b.disabled = true;
+  try { await api('setItems', {changes}); mmChanges = {}; toast(`บันทึก ${changes.length} รายการแล้ว`); await loadInit(); }
+  catch (e) { toast('บันทึกไม่สำเร็จ: ' + e.message); b.disabled = false; }
+}
+function exportStock(){
+  const rows = [['รหัสสินค้า','รายการ','English','หมวด','หน่วย','ที่เก็บ','คงเหลือ','Min','Max','สถานะ','ราคา/หน่วย รวม VAT','มูลค่า','Supplier']];
+  stockRows().forEach(x => { const s = STOCK[x.code]; rows.push([x.code, x.th, x.en, CATNAME[x.cat], x.unit, s.location, s.onHand, s.min, s.max, s.onHand <= 0 ? 'หมด' : (s.min > 0 && s.onHand <= s.min ? 'ต้องสั่ง' : 'ปกติ'), x.inc, (Math.max(0, s.onHand) * x.inc).toFixed(2), x.sup]); });
+  downloadCSV(`stock-คงเหลือ-${today()}.csv`, rows);
+}
+
+/* reorder */
+async function reservedQty(){
+  // approved-but-not-issued quantities
+  try { const r = await api('requests', {status:'approved'}); const m = {}; r.requests.forEach(q => q.lines.forEach(l => m[l.code] = (m[l.code] || 0) + n0(l.qty))); return m; }
+  catch { return {}; }
+}
+let reorderList = [];
+async function renderReorder(){
+  if (!stockLoaded) return;
+  const out = $('#reorderOut');
+  out.innerHTML = `<div class="loading"><span class="spin"></span> กำลังคำนวณ…</div>`;
+  const res = await reservedQty();
+  reorderList = ITEMS.filter(x => { const s = STOCK[x.code]; return s && s.min > 0 && (s.onHand - (res[x.code] || 0)) <= s.min; })
+    .map(x => { const s = STOCK[x.code], avail = s.onHand - (res[x.code] || 0); return {x, s, res: res[x.code] || 0, avail, sug: Math.max(0, (s.max || s.min * 2) - avail)}; });
+  const nomin = ITEMS.filter(x => STOCK[x.code] && !STOCK[x.code].min && !STOCK[x.code].max).length;
+  if (!reorderList.length) { out.innerHTML = `<div class="empty">ยังไม่มีรายการที่ถึงจุดสั่งซื้อ${nomin ? `<br><span style="font-size:15px">(มี ${nomin} รายการที่ยังไม่ได้ตั้ง Min/Max — ตั้งได้ที่หน้า “Stock คงเหลือ”)</span>` : ''}</div>`; return; }
+  const g = {}; reorderList.forEach(r => (g[r.x.sup || 'ไม่ระบุ'] = g[r.x.sup || 'ไม่ระบุ'] || []).push(r));
+  let grand = 0;
+  out.innerHTML = Object.keys(g).sort().map(sup => {
+    const t = g[sup].reduce((s, r) => s + r.sug * r.x.inc, 0); grand += t;
+    return `<div class="panel"><h3><span>${esc(sup)} · ${g[sup].length} รายการ</span><span style="color:var(--brand)">฿${baht(t)}</span></h3>
+      <table class="t"><thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th class="n">คงเหลือ</th><th class="n">จองแล้ว (รอจ่าย)</th><th class="n">Min</th><th class="n">Max</th><th class="n">แนะนำสั่ง</th><th class="n">ราคา/หน่วย</th><th class="n">มูลค่า</th></tr></thead><tbody>
+      ${g[sup].map(r => `<tr><td class="mono">${r.x.code}</td><td>${esc(r.x.th || r.x.en)}</td><td>${esc(r.x.unit)}</td><td class="n">${int(r.s.onHand)}</td><td class="n">${int(r.res)}</td><td class="n">${int(r.s.min)}</td><td class="n">${int(r.s.max)}</td><td class="n"><b style="font-size:18px;color:var(--brand)">${int(r.sug)}</b></td><td class="n">${baht(r.x.inc)}</td><td class="n">${baht(r.sug * r.x.inc)}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  }).join('') + `<div class="panel" style="display:flex;justify-content:space-between;font-size:20px;font-weight:700"><span>รวมมูลค่าที่ต้องสั่งซื้อ (รวม VAT)</span><span style="color:var(--brand)">฿${baht(grand)}</span></div>`;
+}
+function exportReorder(){
+  const rows = [['Supplier','รหัสสินค้า','รายการ','English','หน่วย','คงเหลือ','จองแล้ว','Min','Max','จำนวนแนะนำสั่ง','ราคา/หน่วย ไม่รวม VAT','ราคา/หน่วย รวม VAT','มูลค่า รวม VAT']];
+  reorderList.forEach(r => rows.push([r.x.sup, r.x.code, r.x.th, r.x.en, r.x.unit, r.s.onHand, r.res, r.s.min, r.s.max, r.sug, r.x.ex, r.x.inc, (r.sug * r.x.inc).toFixed(2)]));
+  downloadCSV(`ต้องสั่งซื้อ-${today()}.csv`, rows);
+}
+
+/* receive */
+let recv = [];
+function renderRecv(){
+  $('#rLines').innerHTML = recv.length ? `<table class="t"><thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th class="n">คงเหลือปัจจุบัน</th><th class="n">จำนวนรับเข้า</th><th class="n">คงเหลือใหม่</th><th></th></tr></thead><tbody>
+    ${recv.map((l, i) => { const x = BY[l.code], s = STOCK[l.code] || {onHand:0}; return `<tr><td class="mono">${l.code}</td><td>${esc(x.th || x.en)}</td><td>${esc(x.unit)}</td><td class="n">${int(s.onHand)}</td>
+      <td class="n"><input class="ni" type="number" min="1" value="${l.qty}" data-rq="${i}"></td><td class="n"><b>${int(s.onHand + n0(l.qty))}</b></td><td><button class="rm" data-rrm="${i}">ลบ</button></td></tr>`; }).join('')}</tbody></table>`
+    : `<div class="empty" style="padding:24px">ยังไม่มีรายการ — ค้นหาสินค้าด้านบนเพื่อเพิ่ม</div>`;
+}
+function pickDD(){
+  const v = $('#rPick').value.trim(), dd = $('#rDD');
+  if (!v) { dd.classList.remove('on'); return; }
+  const r = search(ITEMS.filter(x => STOCK[x.code]), v, x => x.th+' '+x.en+' '+x.code).slice(0, 12);
+  dd.innerHTML = r.map(x => `<div data-pick="${x.code}"><span>${esc(x.th || x.en)} <span class="mono" style="color:var(--mute)">${x.code}</span></span><span style="color:var(--mute)">คงเหลือ ${int(STOCK[x.code].onHand)}</span></div>`).join('') || `<div>ไม่พบ</div>`;
+  dd.classList.add('on');
+}
+async function saveRecv(){
+  const err = $('#rErr'); err.textContent = '';
+  const ref = $('#rRef').value.trim();
+  if (!ref) { err.textContent = 'กรุณาใส่เลขที่อ้างอิง'; return; }
+  const lines = recv.filter(l => n0(l.qty) > 0);
+  if (!lines.length) { err.textContent = 'ยังไม่มีรายการรับเข้า'; return; }
+  const b = $('#rSave'); b.disabled = true;
+  try { await api('receive', {ref, note: $('#rNote').value.trim(), lines}); toast(`รับเข้า ${lines.length} รายการแล้ว`); recv = []; $('#rRef').value = ''; $('#rNote').value = ''; await loadInit(); renderRecv(); }
+  catch (e) { err.textContent = 'บันทึกไม่สำเร็จ: ' + e.message; }
+  finally { b.disabled = false; }
+}
+
+/* count */
+let counts = {};
+function countRows(){ return search(ITEMS.filter(x => STOCK[x.code] && (!$('#cCat').value || x.cat === $('#cCat').value)), $('#cq').value, x => x.th+' '+x.en+' '+x.code+' '+(STOCK[x.code].location||'')); }
+function renderCount(){
+  if (!stockLoaded) return;
+  $('#countTbl').innerHTML = `<thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th>ที่เก็บ</th><th class="n">ยอดในระบบ</th><th class="n">นับได้จริง</th><th class="n">ผลต่าง</th></tr></thead><tbody>` +
+    countRows().map(x => { const s = STOCK[x.code], c = counts[x.code], d = c === undefined || c === '' ? '' : n0(c) - s.onHand;
+      return `<tr><td class="mono">${x.code}</td><td>${esc(x.th || x.en)}</td><td>${esc(x.unit)}</td><td>${esc(s.location || '')}</td><td class="n">${int(s.onHand)}</td>
+      <td class="n"><input class="ni ${c !== undefined && c !== '' ? 'changed' : ''}" type="number" min="0" data-cnt="${x.code}" value="${c ?? ''}"></td>
+      <td class="n" data-diff="${x.code}">${d === '' ? '' : `<span class="${d > 0 ? 'diffp' : d < 0 ? 'diffn' : ''}">${d > 0 ? '+' : ''}${int(d)}</span>`}</td></tr>`; }).join('') + '</tbody>';
+  updCountBtn();
+}
+function updCountBtn(){ const n = Object.values(counts).filter(v => v !== '').length; $('#cSave').disabled = !n; $('#cSave').textContent = n ? `บันทึกผลตรวจนับ (${n})` : 'บันทึกผลตรวจนับ'; }
+async function saveCount(){
+  const list = Object.entries(counts).filter(([, v]) => v !== '').map(([code, counted]) => ({code, counted}));
+  const b = $('#cSave'); b.disabled = true;
+  try { const r = await api('count', {counts: list}); toast(`บันทึกแล้ว · ปรับยอด ${r.adjusted} รายการ (${r.ref})`); counts = {}; await loadInit(); }
+  catch (e) { toast('บันทึกไม่สำเร็จ: ' + e.message); b.disabled = false; }
+}
+function countSheet(){
+  const rows = [['รหัสสินค้า','รายการ','หน่วย','ที่เก็บ','ยอดในระบบ','นับได้จริง','หมายเหตุ']];
+  countRows().forEach(x => rows.push([x.code, x.th || x.en, x.unit, STOCK[x.code].location, STOCK[x.code].onHand, '', '']));
+  downloadCSV(`ใบตรวจนับ-${today()}.csv`, rows);
+}
+
+/* txns */
+let txns = [];
+async function loadTxns(){
+  $('#txnTbl').innerHTML = `<tbody><tr><td class="loading"><span class="spin"></span> กำลังโหลด…</td></tr></tbody>`;
+  try { txns = (await api('txns', {from: $('#tFrom').value, to: $('#tTo').value, type: $('#tType').value})).txns; renderTxns(); }
+  catch (e) { $('#txnTbl').innerHTML = `<tbody><tr><td>โหลดไม่สำเร็จ: ${esc(e.message)}</td></tr></tbody>`; }
+}
+function txnRows(){ return search(txns, $('#tq').value, t => [t.code, t.th, t.ref, t.dept, t.by, t.note].join(' ')); }
+function renderTxns(){
+  const rows = txnRows();
+  $('#txnTbl').innerHTML = `<thead><tr><th>วันที่</th><th>ประเภท</th><th>รหัส</th><th>รายการ</th><th class="n">จำนวน</th><th class="n">คงเหลือหลังทำรายการ</th><th>อ้างอิง</th><th>แผนก</th><th>ผู้ทำรายการ</th><th>หมายเหตุ</th></tr></thead><tbody>` +
+    (rows.length ? rows.map(t => `<tr><td style="white-space:nowrap">${fmtDate(t.at)}</td><td><span class="badge ${t.type === 'IN' ? 'b-issued' : t.type === 'OUT' ? 'b-approved' : 'b-pending'}">${TT[t.type] || t.type}</span></td>
+      <td class="mono">${esc(t.code)}</td><td>${esc(t.th)}</td><td class="n"><b class="${n0(t.qty) > 0 ? 'diffp' : 'diffn'}">${n0(t.qty) > 0 ? '+' : ''}${int(t.qty)}</b></td><td class="n">${int(t.balance)}</td>
+      <td class="mono">${esc(t.ref)}</td><td>${esc(t.dept)}</td><td>${esc(t.by)}</td><td>${esc(t.note)}</td></tr>`).join('') : `<tr><td colspan="10" class="empty">ไม่มีรายการ</td></tr>`) + '</tbody>';
+}
+function exportTxns(){
+  const rows = [['วันที่','ประเภท','รหัสสินค้า','รายการ','จำนวน','คงเหลือหลังทำรายการ','อ้างอิง','แผนก','ผู้ทำรายการ','หมายเหตุ','ราคา/หน่วย รวม VAT']];
+  txnRows().forEach(t => rows.push([fmtDate(t.at), TT[t.type], t.code, t.th, t.qty, t.balance, t.ref, t.dept, t.by, t.note, t.priceInc]));
+  downloadCSV(`ความเคลื่อนไหว-stock-${today()}.csv`, rows);
+}
+
+/* report (based on OUT transactions = actual issued) */
+let repOut = [];
+async function loadRep(){
+  ['#repDept','#repMonth','#repTop','#repDeptItems'].forEach(s => $(s).innerHTML = `<div class="loading"><span class="spin"></span></div>`);
+  try { repOut = (await api('txns', {from: $('#pFrom').value, to: $('#pTo').value, type: 'OUT'})).txns; renderRep(); }
+  catch (e) { $('#repDept').innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; }
+}
+function bars(pairs){
+  const mx = Math.max(1, ...pairs.map(p => p[1]));
+  return pairs.length ? pairs.map(([k, v]) => `<div class="bar"><div>${esc(k)}</div><div class="tr"><div class="fill" style="width:${(v / mx * 100).toFixed(1)}%"></div></div><div class="v">฿${baht(v)}</div></div>`).join('') : `<div class="empty" style="padding:20px">ไม่มีข้อมูล</div>`;
+}
+function renderRep(){
+  const val = t => -n0(t.qty) * n0(t.priceInc);
+  const by = (f) => { const m = {}; repOut.forEach(t => { const k = f(t); m[k] = (m[k] || 0) + val(t); }); return m; };
+  const dept = Object.entries(by(t => t.dept || 'ไม่ระบุ')).sort((a, b) => b[1] - a[1]);
+  const mon = Object.entries(by(t => localMonth(t.at))).sort((a, b) => a[0].localeCompare(b[0])).map(([k, v]) => [monthLabel(k), v]);
+  const total = repOut.reduce((s, t) => s + val(t), 0), reqs = new Set(repOut.map(t => t.ref)).size;
+  $('#repStats').innerHTML = [['มูลค่าเบิกจ่ายรวม (รวม VAT)', '฿' + baht(total), 'var(--brand)'], ['จำนวนใบเบิกที่จ่าย', int(reqs), 'var(--ink)'], ['จำนวนแผนก', int(dept.length), 'var(--ink)'], ['จำนวนรายการจ่าย', int(repOut.length), 'var(--ink)']]
+    .map(([k, v, col]) => `<div class="stat"><div class="k">${k}</div><div class="v" style="color:${col}">${v}</div></div>`).join('');
+  $('#repDept').innerHTML = bars(dept); $('#repMonth').innerHTML = bars(mon);
+  const items = {}; repOut.forEach(t => { const i = items[t.code] = items[t.code] || {code:t.code, th:t.th, qty:0, v:0}; i.qty += -n0(t.qty); i.v += val(t); });
+  const top = Object.values(items).sort((a, b) => b.v - a.v).slice(0, 15);
+  $('#repTop').innerHTML = top.length ? `<table class="t"><thead><tr><th>#</th><th>รหัส</th><th>รายการ</th><th class="n">จำนวน</th><th>หน่วย</th><th class="n">มูลค่า (รวม VAT)</th></tr></thead><tbody>${top.map((i, k) => `<tr><td>${k+1}</td><td class="mono">${i.code}</td><td>${esc(i.th)}</td><td class="n">${int(i.qty)}</td><td>${esc((BY[i.code]||{}).unit || '')}</td><td class="n">${baht(i.v)}</td></tr>`).join('')}</tbody></table>` : `<div class="empty" style="padding:20px">ไม่มีข้อมูล</div>`;
+  const dm = {}; repOut.forEach(t => { const d = t.dept || 'ไม่ระบุ'; const m = dm[d] = dm[d] || {}; const i = m[t.code] = m[t.code] || {th:t.th, qty:0, v:0}; i.qty += -n0(t.qty); i.v += val(t); });
+  $('#repDeptItems').innerHTML = dept.length ? dept.map(([d, tv]) => `<details style="margin-bottom:8px"><summary style="cursor:pointer;font-size:17px;font-weight:600;padding:6px 0">${esc(d)} — ฿${baht(tv)}</summary>
+    <table class="t"><tbody>${Object.entries(dm[d]).sort((a, b) => b[1].v - a[1].v).map(([c, i]) => `<tr><td class="mono">${c}</td><td>${esc(i.th)}</td><td class="n">${int(i.qty)} ${esc((BY[c]||{}).unit || '')}</td><td class="n">${baht(i.v)}</td></tr>`).join('')}</tbody></table></details>`).join('') : `<div class="empty" style="padding:20px">ไม่มีข้อมูล</div>`;
+}
+function exportRep(){
+  const rows = [['แผนก','เดือน','รหัสสินค้า','รายการ','จำนวน','หน่วย','มูลค่า รวม VAT','เลขที่ใบเบิก']];
+  repOut.forEach(t => rows.push([t.dept, localMonth(t.at), t.code, t.th, -n0(t.qty), (BY[t.code]||{}).unit || '', (-n0(t.qty) * n0(t.priceInc)).toFixed(2), t.ref]));
+  downloadCSV(`รายงานเบิกตามแผนก-${$('#pFrom').value || 'all'}_${$('#pTo').value || 'all'}.csv`, rows);
+}
+
+function logout(){ try { sessionStorage.removeItem('sr_admin'); } catch {} showAdmin(); }
+function goSub(s){
+  sub = s;
+  document.querySelectorAll('#subtabs button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+  ['req','stock','reorder','recv','count','txn','rep'].forEach(k => $('#s-' + k).classList.toggle('hide', k !== s));
+  if (s === 'stock') renderStock();
+  if (s === 'reorder') renderReorder();
+  if (s === 'recv') renderRecv();
+  if (s === 'count') renderCount();
+  if (s === 'txn' && !txns.length) loadTxns();
+  if (s === 'rep') loadRep();
+}
+
+/* ---------- views ---------- */
+function go(v){
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  ['catalog','mine','admin'].forEach(k => $('#v-' + k).classList.toggle('hide', k !== v));
+  try { history.replaceState(null, '', v === 'catalog' ? location.pathname + location.search : '#' + v); } catch {}
+  if (v === 'mine') { if (!$('#mineEmp').value) $('#mineEmp').value = ls.get('sr_profile', {}).empId || ''; if ($('#mineEmp').value) loadMine(); }
+  if (v === 'admin') showAdmin();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', async e => {
+  const pk = e.target.closest('[data-pick]');
+  if (pk) { const c = pk.dataset.pick; const ex = recv.find(l => l.code === c); if (ex) ex.qty = n0(ex.qty) + 1; else recv.push({code:c, qty:1}); $('#rPick').value = ''; $('#rDD').classList.remove('on'); renderRecv(); return; }
+  if (!e.target.closest('.pick')) $('#rDD').classList.remove('on');
+  const fsCard = e.target.closest('[data-fs]'); if (fsCard) { $('#fStatus').value = fsCard.dataset.fs; loadReqs(); return; }
+  const t = e.target.closest('button,[data-detail],[data-toggle]'); if (!t) return;
+  const d = t.dataset;
+  if (d.add) setQty(d.add, 1);
+  else if (d.inc) setQty(d.inc, (cart[d.inc] || 0) + 1);
+  else if (d.dec) setQty(d.dec, (cart[d.dec] || 0) - 1);
+  else if (d.rm) setQty(d.rm, 0);
+  else if (d.detail) showDetail(d.detail);
+  else if (d.c !== undefined && t.classList.contains('chip')) { cat = d.c; renderChips(); renderGrid(); }
+  else if (d.v) go(d.v);
+  else if (d.s) goSub(d.s);
+  else if (d.goto) { closeModal(); go(d.goto); }
+  else if ('mclose' in d) closeModal();
+  else if ('close' in d) closeCart();
+  else if ('toggle' in d) t.closest('.rq').classList.toggle('open');
+  else if (d.form) { const r = myReqs.concat(adminReqs).find(x => x.id === d.form); if (r) openForm(r); }
+  else if (d.again) { const r = myReqs.find(x => x.id === d.again); if (r) { r.lines.forEach(i => { if (BY[i.code]) cart[i.code] = (cart[i.code] || 0) + n0(i.qty); }); ls.set('sr_cart', cart); renderCart(); renderGrid(); openCart(); } }
+  else if (d.cancel) {
+    if (d.sure !== '1') { t.dataset.sure = '1'; t.textContent = 'กดอีกครั้งเพื่อยืนยันยกเลิก'; return; }
+    t.disabled = true;
+    try { await api('cancel', {id: d.cancel, empId: $('#mineEmp').value.trim()}); toast('ยกเลิกคำขอแล้ว'); loadMine(); } catch (er) { toast('ยกเลิกไม่สำเร็จ: ' + er.message); t.disabled = false; }
+  }
+  else if (d.set) {
+    const box = t.closest('.rq'), note = (box.querySelector('[data-note]') || {}).value || '';
+    t.disabled = true;
+    try { await api('setStatus', {id: box.dataset.rid, status: d.set, note}); toast(ST[d.set] + ' · ' + box.dataset.rid); loadReqs(); } catch (er) { toast('บันทึกไม่สำเร็จ: ' + er.message); t.disabled = false; }
+  }
+  else if ('issue' in d) {
+    const box = t.closest('.rq'), lines = [...box.querySelectorAll('[data-iss]')].map(i => ({code: i.dataset.iss, qty: i.value}));
+    if (d.sure !== '1') { t.dataset.sure = '1'; t.textContent = 'ยืนยันจ่ายของและตัด stock?'; return; }
+    t.disabled = true; t.innerHTML = '<span class="spin"></span> กำลังบันทึก…';
+    try { await api('issue', {id: box.dataset.rid, lines, note: (box.querySelector('[data-note]') || {}).value || ''}); toast('จ่ายของแล้ว · ตัด stock เรียบร้อย'); await loadInit(); loadReqs(); txns = []; }
+    catch (er) { toast(er.message); t.disabled = false; t.dataset.sure = ''; t.textContent = '📦 จ่ายของ (ตัด stock)'; }
+  }
+  else if (d.rrm) { recv.splice(+d.rrm, 1); renderRecv(); }
+  else if (t.id === 'seedBtn') seed();
+});
+document.addEventListener('change', e => {
+  const d = e.target.dataset;
+  if (d.qty) setQty(d.qty, e.target.value);
+  if (d.rq !== undefined) { recv[+d.rq].qty = Math.max(0, Math.floor(n0(e.target.value))); renderRecv(); }
+});
+document.addEventListener('input', e => {
+  const d = e.target.dataset;
+  if (d.mm) { const s = STOCK[d.code], k = d.mm, v = e.target.value; const orig = k === 'location' ? (s.location || '') : String(s[k] || '');
+    mmChanges[d.code] = mmChanges[d.code] || {}; if (v === orig) delete mmChanges[d.code][k]; else mmChanges[d.code][k] = v;
+    if (!Object.keys(mmChanges[d.code]).length) delete mmChanges[d.code];
+    e.target.classList.toggle('changed', v !== orig); $('#saveMM').disabled = !Object.keys(mmChanges).length; $('#saveMM').textContent = Object.keys(mmChanges).length ? `บันทึก (${Object.keys(mmChanges).length} รายการ)` : 'บันทึก Min/Max'; }
+  if (d.cnt) { const v = e.target.value; if (v === '') delete counts[d.cnt]; else counts[d.cnt] = v;
+    const s = STOCK[d.cnt], cell = document.querySelector(`[data-diff="${CSS.escape(d.cnt)}"]`), df = v === '' ? '' : n0(v) - s.onHand;
+    cell.innerHTML = df === '' ? '' : `<span class="${df > 0 ? 'diffp' : df < 0 ? 'diffn' : ''}">${df > 0 ? '+' : ''}${int(df)}</span>`; e.target.classList.toggle('changed', v !== ''); updCountBtn(); }
+});
+$('#q').addEventListener('input', e => { q = e.target.value; renderGrid(); });
+$('#sort').addEventListener('change', e => { sort = e.target.value; renderGrid(); });
+$('#openCart').onclick = openCart;
+$('#scrim').onclick = closeCart;
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeCart(); } });
+$('#clearCart').onclick = () => { cart = {}; ls.set('sr_cart', cart); renderCart(); renderGrid(); };
+$('#submit').onclick = submit;
+$('#mineLoad').onclick = loadMine;
+$('#mineEmp').addEventListener('keydown', e => { if (e.key === 'Enter') loadMine(); });
+$('#loginBtn').onclick = login;
+$('#loginForm').addEventListener('submit', e => { e.preventDefault(); login(); });
+$('#loginForm').pin.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); login(); } });
+$('#logout').onclick = logout;
+['#fStatus','#fMonth'].forEach(s => $(s).addEventListener('change', loadReqs));
+$('#fq').addEventListener('input', renderReqs);
+$('#reqReload').onclick = loadReqs; $('#expReq').onclick = exportReqs;
+['#sq'].forEach(s => $(s).addEventListener('input', renderStock));
+['#sCat','#sFilter'].forEach(s => $(s).addEventListener('change', renderStock));
+$('#saveMM').onclick = saveMM; $('#expStock').onclick = exportStock;
+$('#expReorder').onclick = exportReorder;
+$('#reorderToRecv').onclick = () => { recv = reorderList.filter(r => r.sug > 0).map(r => ({code: r.x.code, qty: r.sug})); goSub('recv'); toast('เพิ่มรายการแนะนำสั่งซื้อในหน้ารับเข้าแล้ว — แก้จำนวนตามที่ได้รับจริง'); };
+$('#rPick').addEventListener('input', pickDD); $('#rPick').addEventListener('focus', pickDD);
+$('#rSave').onclick = saveRecv; $('#rClear').onclick = () => { recv = []; renderRecv(); };
+$('#cq').addEventListener('input', renderCount); $('#cCat').addEventListener('change', renderCount);
+$('#cSave').onclick = saveCount; $('#cSheet').onclick = countSheet;
+$('#tLoad').onclick = loadTxns; ['#tFrom','#tTo','#tType'].forEach(s => $(s).addEventListener('change', loadTxns));
+$('#tq').addEventListener('input', renderTxns); $('#expTxn').onclick = exportTxns;
+$('#pLoad').onclick = loadRep; ['#pFrom','#pTo'].forEach(s => $(s).addEventListener('change', loadRep)); $('#expRep').onclick = exportRep;
+
+const catOpts = `<option value="">ทุกหมวด</option>` + CATS.slice(1).map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+$('#sCat').innerHTML = catOpts; $('#cCat').innerHTML = catOpts;
+const tm = thisMonth(); $('#tFrom').value = tm; $('#tTo').value = tm;
+const y0 = new Date().getFullYear() + '-01'; $('#pFrom').value = y0; $('#pTo').value = tm;
+if (DEMO) { const b = $('#banner'); b.classList.add('demo'); b.innerHTML = '🧪 <b>โหมดทดลอง</b> — ยังไม่ได้เชื่อม Google Sheet ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น · PIN ผู้ดูแล = 1234'; b.style.display = 'block'; }
+renderChips(); renderGrid(); renderCart();
+const h = location.hash.slice(1); if (h === 'mine' || h === 'admin') go(h);
+loadInit();
+})();
+</script>
+</body>
+</html>
