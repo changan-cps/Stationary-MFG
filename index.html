@@ -303,7 +303,7 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
         <div class="subtabs" id="subtabs" style="flex-wrap:wrap;margin:0">
           <button data-s="req" class="on">คำขอเบิก</button>
           <button data-s="stock">Stock คงเหลือ</button>
-          <button data-s="reorder">ต้องสั่งซื้อ</button>
+          <button data-s="reorder">ต้องสั่งซื้อ<span class="n hide" id="reN" style="display:inline-block;min-width:22px;padding:0 6px;margin-left:6px;border-radius:11px;background:#e5484d;color:#fff;font-size:13px;line-height:22px"></span></button>
           <button data-s="recv">รับเข้า</button>
           <button data-s="count">ตรวจนับ</button>
           <button data-s="txn">ความเคลื่อนไหว</button>
@@ -357,7 +357,7 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
       <!-- reorder -->
       <div id="s-reorder" class="hide">
         <div class="toolbar">
-          <div style="flex:1;color:var(--mute);font-size:16px">รายการที่คงเหลือ ≤ Min · จำนวนแนะนำ = Max − คงเหลือ (หักยอดที่อนุมัติแล้วรอจ่าย)</div>
+          <div style="flex:1;color:var(--mute);font-size:16px">อัปเดตอัตโนมัติเมื่อมีคำขอเบิก · ยอดใช้ได้ = คงเหลือ − ยอดขอเบิกค้าง (รออนุมัติ + รอจ่าย) · แสดงเมื่อยอดใช้ได้ ≤ Min หรือไม่พอตามคำขอ</div>
           <button class="btn sec sm" id="expReorder">⬇ CSV สำหรับสั่งซื้อ</button>
           <button class="btn pri sm" style="flex:0" id="reorderToRecv">ส่งไปหน้ารับเข้า →</button>
         </div>
@@ -1027,7 +1027,7 @@ async function loadReqs(){
   el.innerHTML = `<div class="loading"><span class="spin"></span> กำลังโหลด…</div>`;
   try {
     const r = await api('requests', {status: $('#fStatus').value, month: $('#fMonth').value});
-    adminReqs = r.requests; reqCounts = r.counts || {}; renderReqs();
+    adminReqs = r.requests; reqCounts = r.counts || {}; renderReqs(); refreshReorderBadge();
   } catch (e) { el.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(e.message)}</div>`; if (/PIN/.test(e.message)) logout(); }
 }
 function renderReqs(){
@@ -1105,35 +1105,58 @@ function exportStock(){
   downloadCSV(`stock-คงเหลือ-${today()}.csv`, rows);
 }
 
-/* reorder */
-async function reservedQty(){
-  // approved-but-not-issued quantities
-  try { const r = await api('requests', {status:'approved'}); const m = {}; r.requests.forEach(q => q.lines.forEach(l => m[l.code] = (m[l.code] || 0) + n0(l.qty))); return m; }
-  catch { return {}; }
+/* reorder — นับยอดขอเบิกค้าง (pending + approved) อัตโนมัติ */
+async function demandQty(){
+  const m = {};
+  try {
+    const r = await api('requests', {status: ''});
+    r.requests.filter(q => q.status === 'pending' || q.status === 'approved').forEach(q => q.lines.forEach(l => {
+      const d = m[l.code] = m[l.code] || {qty: 0, pend: 0, appr: 0, reqs: []};
+      d.qty += n0(l.qty); d[q.status === 'pending' ? 'pend' : 'appr'] += n0(l.qty); d.reqs.push(q.id);
+    }));
+  } catch {}
+  return m;
 }
 let reorderList = [];
+function calcReorder(dem){
+  return ITEMS.filter(x => STOCK[x.code] && active(x)).map(x => {
+    const s = STOCK[x.code], d = dem[x.code] || {qty: 0, pend: 0, appr: 0, reqs: []}, avail = s.onHand - d.qty;
+    const low = s.min > 0 && avail <= s.min, short = avail < 0;
+    if (!low && !short) return null;
+    const target = s.max > 0 ? s.max : (s.min > 0 ? s.min * 2 : 0);
+    const sug = Math.max(target - avail, short ? -avail : 0, 0);
+    return {x, s, d, avail, sug, why: short ? 'ของไม่พอตามคำขอ' : 'ต่ำกว่า Min'};
+  }).filter(Boolean);
+}
+async function refreshReorderBadge(){
+  if (!stockLoaded || !admin()) return;
+  reorderList = calcReorder(await demandQty());
+  const n = reorderList.length, el = $('#reN');
+  el.textContent = n; el.classList.toggle('hide', !n);
+}
 async function renderReorder(){
   if (!stockLoaded) return;
   const out = $('#reorderOut');
   out.innerHTML = `<div class="loading"><span class="spin"></span> กำลังคำนวณ…</div>`;
-  const res = await reservedQty();
-  reorderList = ITEMS.filter(x => { const s = STOCK[x.code]; return s && s.min > 0 && (s.onHand - (res[x.code] || 0)) <= s.min; })
-    .map(x => { const s = STOCK[x.code], avail = s.onHand - (res[x.code] || 0); return {x, s, res: res[x.code] || 0, avail, sug: Math.max(0, (s.max || s.min * 2) - avail)}; });
+  await refreshReorderBadge();
   const nomin = ITEMS.filter(x => STOCK[x.code] && !STOCK[x.code].min && !STOCK[x.code].max).length;
-  if (!reorderList.length) { out.innerHTML = `<div class="empty">ยังไม่มีรายการที่ถึงจุดสั่งซื้อ${nomin ? `<br><span style="font-size:15px">(มี ${nomin} รายการที่ยังไม่ได้ตั้ง Min/Max — ตั้งได้ที่หน้า “Stock คงเหลือ”)</span>` : ''}</div>`; return; }
+  if (!reorderList.length) { out.innerHTML = `<div class="empty">ยังไม่มีรายการที่ต้องสั่งซื้อ${nomin ? `<br><span style="font-size:15px">(มี ${nomin} รายการที่ยังไม่ได้ตั้ง Min/Max — รายการเหล่านี้จะขึ้นเมื่อของไม่พอตามคำขอเท่านั้น)</span>` : ''}</div>`; return; }
   const g = {}; reorderList.forEach(r => (g[r.x.sup || 'ไม่ระบุ'] = g[r.x.sup || 'ไม่ระบุ'] || []).push(r));
   let grand = 0;
   out.innerHTML = Object.keys(g).sort().map(sup => {
     const t = g[sup].reduce((s, r) => s + r.sug * r.x.inc, 0); grand += t;
     return `<div class="panel"><h3><span>${esc(sup)} · ${g[sup].length} รายการ</span><span style="color:var(--brand)">฿${baht(t)}</span></h3>
-      <table class="t"><thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th class="n">คงเหลือ</th><th class="n">จองแล้ว (รอจ่าย)</th><th class="n">Min</th><th class="n">Max</th><th class="n">แนะนำสั่ง</th><th class="n">ราคา/หน่วย</th><th class="n">มูลค่า</th></tr></thead><tbody>
-      ${g[sup].map(r => `<tr><td class="mono">${r.x.code}</td><td>${esc(r.x.th || r.x.en)}</td><td>${esc(r.x.unit)}</td><td class="n">${int(r.s.onHand)}</td><td class="n">${int(r.res)}</td><td class="n">${int(r.s.min)}</td><td class="n">${int(r.s.max)}</td><td class="n"><b style="font-size:18px;color:var(--brand)">${int(r.sug)}</b></td><td class="n">${baht(r.x.inc)}</td><td class="n">${baht(r.sug * r.x.inc)}</td></tr>`).join('')}
-      </tbody></table></div>`;
+      <div style="overflow:auto"><table class="t"><thead><tr><th>รหัส</th><th>รายการ</th><th>หน่วย</th><th class="n">คงเหลือ</th><th class="n">ขอเบิกค้าง</th><th class="n">ใช้ได้</th><th class="n">Min</th><th class="n">Max</th><th class="n">แนะนำสั่ง</th><th>เหตุผล</th><th class="n">มูลค่า</th></tr></thead><tbody>
+      ${g[sup].map(r => `<tr class="${r.avail < 0 ? 'out' : 'low'}"><td class="mono">${r.x.code}</td><td>${esc(r.x.th || r.x.en)}${r.d.reqs.length ? `<div style="font-size:13px;color:var(--mute)">จากคำขอ ${r.d.reqs.map(esc).join(', ')}</div>` : ''}</td><td>${esc(r.x.unit)}</td>
+        <td class="n">${int(r.s.onHand)}</td><td class="n" title="รออนุมัติ ${r.d.pend} · รอจ่าย ${r.d.appr}">${int(r.d.qty)}</td><td class="n"><b class="${r.avail < 0 ? 'diffn' : ''}">${int(r.avail)}</b></td>
+        <td class="n">${int(r.s.min)}</td><td class="n">${int(r.s.max)}</td><td class="n"><b style="font-size:18px;color:var(--brand)">${int(r.sug)}</b></td>
+        <td>${r.avail < 0 ? '<span class="s-out">● ' + r.why + '</span>' : '<span class="s-low">● ' + r.why + '</span>'}</td><td class="n">${baht(r.sug * r.x.inc)}</td></tr>`).join('')}
+      </tbody></table></div></div>`;
   }).join('') + `<div class="panel" style="display:flex;justify-content:space-between;font-size:20px;font-weight:700"><span>รวมมูลค่าที่ต้องสั่งซื้อ (รวม VAT)</span><span style="color:var(--brand)">฿${baht(grand)}</span></div>`;
 }
 function exportReorder(){
-  const rows = [['Supplier','รหัสสินค้า','รายการ','English','หน่วย','คงเหลือ','จองแล้ว','Min','Max','จำนวนแนะนำสั่ง','ราคา/หน่วย ไม่รวม VAT','ราคา/หน่วย รวม VAT','มูลค่า รวม VAT']];
-  reorderList.forEach(r => rows.push([r.x.sup, r.x.code, r.x.th, r.x.en, r.x.unit, r.s.onHand, r.res, r.s.min, r.s.max, r.sug, r.x.ex, r.x.inc, (r.sug * r.x.inc).toFixed(2)]));
+  const rows = [['Supplier','รหัสสินค้า','รายการ','English','หน่วย','คงเหลือ','ขอเบิกค้าง','ใช้ได้','Min','Max','จำนวนแนะนำสั่ง','เหตุผล','ราคา/หน่วย ไม่รวม VAT','ราคา/หน่วย รวม VAT','มูลค่า รวม VAT','จากคำขอ']];
+  reorderList.forEach(r => rows.push([r.x.sup, r.x.code, r.x.th, r.x.en, r.x.unit, r.s.onHand, r.d.qty, r.avail, r.s.min, r.s.max, r.sug, r.why, r.x.ex, r.x.inc, (r.sug * r.x.inc).toFixed(2), r.d.reqs.join(' ')]));
   downloadCSV(`ต้องสั่งซื้อ-${today()}.csv`, rows);
 }
 
