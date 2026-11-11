@@ -318,7 +318,7 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
           </select>
           <input type="month" class="sel" id="fMonth">
           <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input id="fq" type="search" placeholder="ค้นหา เลขที่ / ชื่อ / แผนก / Cost center"></div>
+            <input id="fq" type="search" placeholder="ค้นหา เลขที่ / ชื่อ / แผนก / รหัสพนักงาน"></div>
           <button class="btn sec sm" id="reqReload">↻ รีเฟรช</button>
           <button class="btn sec sm" id="expReq">⬇ CSV</button>
         </div>
@@ -430,9 +430,8 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
       <label>ชื่อ-นามสกุลผู้ขอ <span class="req">*</span><input name="name" required></label>
       <label>รหัสพนักงาน <span class="req">*</span><input name="empId" required></label>
       <label>แผนก / ฝ่าย <span class="req">*</span><input name="dept" list="deptList" required></label>
-      <label>Cost center<input name="cc"></label>
-      <label>วันที่ต้องการใช้<input name="need" type="date"></label>
       <label>เบอร์ติดต่อ<input name="tel"></label>
+      <label class="full">วันที่ต้องการใช้<input name="need" type="date"></label>
       <label class="full">วัตถุประสงค์ / หมายเหตุ<textarea name="purpose" rows="2"></textarea></label>
       <datalist id="deptList"></datalist>
     </form>
@@ -834,15 +833,15 @@ function openCart(){ fillProfile(); $('#drawer').classList.add('on'); $('#scrim'
 function closeCart(){ $('#drawer').classList.remove('on'); $('#scrim').classList.remove('on'); }
 function fillProfile(){
   const p = ls.get('sr_profile', {}), f = $('#reqForm');
-  ['name','empId','dept','cc','tel'].forEach(k => { if (p[k] && !f[k].value) f[k].value = p[k]; });
+  ['name','empId','dept','tel'].forEach(k => { if (p[k] && !f[k].value) f[k].value = p[k]; });
 }
 async function submit(){
   const f = $('#reqForm'), err = $('#formErr'); err.textContent = '';
   const L = cartLines(); if (!L.length) return;
   if (!f.reportValidity()) { err.textContent = 'กรุณากรอกข้อมูลที่มี * ให้ครบ'; return; }
   const v = k => f[k].value.trim();
-  const p = {name:v('name'), empId:v('empId'), dept:v('dept'), cc:v('cc'), tel:v('tel'), need:v('need'), purpose:v('purpose'), lines: L.map(l => ({code:l.x.code, qty:l.n}))};
-  ls.set('sr_profile', {name:p.name, empId:p.empId, dept:p.dept, cc:p.cc, tel:p.tel});
+  const p = {name:v('name'), empId:v('empId'), dept:v('dept'), tel:v('tel'), need:v('need'), purpose:v('purpose'), lines: L.map(l => ({code:l.x.code, qty:l.n}))};
+  ls.set('sr_profile', {name:p.name, empId:p.empId, dept:p.dept, tel:p.tel});
   const b = $('#submit'); b.disabled = true; b.innerHTML = '<span class="spin"></span> กำลังส่ง…';
   try {
     const r = await api('submit', p);
@@ -871,7 +870,7 @@ function itemsTable(r, issueMode){
 function reqInfo(r){
   const k = (l, v) => v ? `<span>${l}: <b style="color:var(--ink)">${esc(v)}</b></span>` : '';
   return `<div style="display:flex;flex-wrap:wrap;gap:6px 22px;font-size:15px;color:var(--mute);margin-bottom:10px">
-    ${k('รหัสพนักงาน', r.empId)}${k('แผนก', r.dept)}${k('Cost center', r.cc)}${r.need ? k('ต้องการใช้', fmtDay(r.need)) : ''}${k('โทร', r.tel)}</div>
+    ${k('รหัสพนักงาน', r.empId)}${k('แผนก', r.dept)}${r.need ? k('ต้องการใช้', fmtDay(r.need)) : ''}${k('โทร', r.tel)}</div>
     ${r.purpose ? `<div class="note" style="margin:0 0 10px">วัตถุประสงค์: ${esc(r.purpose)}</div>` : ''}`;
 }
 const statusLine = r => (r.note || r.actionBy) ? `<div class="note">${r.actionBy ? '👤 ' + esc(r.actionBy) + ' · ' + fmtDate(r.actionAt) : ''}${r.note ? '<br>💬 ' + esc(r.note) : ''}</div>` : '';
@@ -888,9 +887,9 @@ table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;padding:5p
 <div class="pb"><button onclick="window.print()">🖨 พิมพ์ / บันทึกเป็น PDF</button></div>
 <div class="top"><div><h1>ใบขอเบิกเครื่องเขียน / Stationery Requisition</h1><h2>Changan Rayong Plant</h2></div><div class="no">${esc(r.id)}</div></div>
 <div class="info"><div><b>ผู้ขอเบิก:</b> ${esc(r.name)}</div><div><b>รหัสพนักงาน:</b> ${esc(r.empId)}</div>
-<div><b>แผนก:</b> ${esc(r.dept)}</div><div><b>Cost center:</b> ${esc(r.cc || '-')}</div>
+<div><b>แผนก:</b> ${esc(r.dept)}</div><div><b>เบอร์ติดต่อ:</b> ${esc(r.tel || '-')}</div>
 <div><b>วันที่ขอ:</b> ${fmtDate(r.at)}</div><div><b>วันที่ต้องการใช้:</b> ${fmtDay(r.need)}</div>
-<div><b>สถานะ:</b> ${ST[r.status] || r.status}${r.actionBy ? ' (' + esc(r.actionBy) + ')' : ''}</div><div><b>เบอร์ติดต่อ:</b> ${esc(r.tel || '-')}</div>
+<div style="grid-column:1/-1"><b>สถานะ:</b> ${ST[r.status] || r.status}${r.actionBy ? ' (' + esc(r.actionBy) + ')' : ''}</div>
 <div style="grid-column:1/-1"><b>วัตถุประสงค์:</b> ${esc(r.purpose || '-')}</div></div>
 <table><thead><tr><th>#</th><th>รหัสสินค้า</th><th>รายการ</th><th>จำนวนขอ</th><th>จ่ายจริง</th><th>หน่วย</th><th>ราคา/หน่วย<br>(รวม VAT)</th><th>รวม (บาท)</th></tr></thead>
 <tbody>${rows}<tr><td colspan="7" class="r"><b>ยอดรวมทั้งสิ้น (รวม VAT 7%)</b></td><td class="r"><b>${baht(r.totalInc)}</b></td></tr></tbody></table>
@@ -1016,7 +1015,7 @@ function renderReqs(){
   $('#reqStats').innerHTML = [['รออนุมัติ', c.pending||0, 'var(--warn)', 'pending'], ['อนุมัติแล้ว รอจ่ายของ', c.approved||0, 'var(--brand)', 'approved'], ['จ่ายของแล้ว', c.issued||0, 'var(--ok)', 'issued'], ['ไม่อนุมัติ / ยกเลิก', (c.rejected||0) + (c.cancelled||0), 'var(--mute)', 'rejected']]
     .map(([k, v, col, s]) => `<div class="stat" style="cursor:pointer" data-fs="${s}"><div class="k">${k}</div><div class="v" style="color:${col}">${v}</div></div>`).join('');
   const fq = $('#fq').value.trim();
-  const rows = fq ? search(adminReqs, fq, r => [r.id, r.name, r.dept, r.cc, r.empId].join(' ')) : adminReqs;
+  const rows = fq ? search(adminReqs, fq, r => [r.id, r.name, r.dept, r.empId].join(' ')) : adminReqs;
   $('#adminList').innerHTML = rows.length ? rows.map(r => `
     <div class="rq" data-rid="${esc(r.id)}">
       <div class="rqh" data-toggle>
@@ -1036,8 +1035,8 @@ function renderReqs(){
     </div>`).join('') : `<div class="empty">ไม่มีคำขอในเงื่อนไขนี้</div>`;
 }
 function exportReqs(){
-  const rows = [['เลขที่คำขอ','วันที่ขอ','สถานะ','ชื่อผู้ขอ','รหัสพนักงาน','แผนก','Cost center','วันที่ต้องการใช้','วัตถุประสงค์','รหัสสินค้า','รายการ','จำนวนขอ','จ่ายจริง','หน่วย','ราคา/หน่วย รวม VAT','รวม รวม VAT','Supplier','ผู้ดำเนินการ','หมายเหตุ']];
-  adminReqs.forEach(r => r.lines.forEach(i => rows.push([r.id, fmtDate(r.at), ST[r.status], r.name, r.empId, r.dept, r.cc, r.need, r.purpose, i.code, i.th, i.qty, i.issuedQty, i.unit, i.priceInc, (n0(i.priceInc)*n0(i.qty)).toFixed(2), i.supplier, r.actionBy, r.note])));
+  const rows = [['เลขที่คำขอ','วันที่ขอ','สถานะ','ชื่อผู้ขอ','รหัสพนักงาน','แผนก','วันที่ต้องการใช้','วัตถุประสงค์','รหัสสินค้า','รายการ','จำนวนขอ','จ่ายจริง','หน่วย','ราคา/หน่วย รวม VAT','รวม รวม VAT','Supplier','ผู้ดำเนินการ','หมายเหตุ']];
+  adminReqs.forEach(r => r.lines.forEach(i => rows.push([r.id, fmtDate(r.at), ST[r.status], r.name, r.empId, r.dept, r.need, r.purpose, i.code, i.th, i.qty, i.issuedQty, i.unit, i.priceInc, (n0(i.priceInc)*n0(i.qty)).toFixed(2), i.supplier, r.actionBy, r.note])));
   downloadCSV(`คำขอเบิก-${today()}.csv`, rows);
 }
 
