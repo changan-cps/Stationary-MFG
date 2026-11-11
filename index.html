@@ -59,7 +59,7 @@ main{padding:22px 0 60px}
 .item .row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:auto;padding-top:10px;gap:8px}
 .price{font-weight:700;font-size:20px;color:var(--brand)}
 .price small{font-size:13px;color:var(--mute);font-weight:500}
-.add{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-weight:600;font-size:16px}
+.add{white-space:nowrap;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-weight:600;font-size:16px}
 .add:hover{background:var(--brand2)}
 .step{display:flex;align-items:center;border:1.5px solid var(--brand);border-radius:10px;overflow:hidden;background:#fff}
 .step button{border:0;background:var(--soft);color:var(--brand);width:36px;height:38px;font-size:20px;font-weight:700}
@@ -175,6 +175,8 @@ table.t td.n,table.t th.n{text-align:right;white-space:nowrap}
 }
 
 table.t td.mono{white-space:nowrap}
+table.t th{white-space:nowrap}
+.s-ok,.s-low,.s-out{white-space:nowrap}
 
 .stock{font-size:14px;font-weight:600;margin-top:2px}
 .s-ok{color:var(--ok)} .s-low{color:var(--warn)} .s-out{color:var(--bad)}
@@ -214,6 +216,7 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
     <nav id="nav">
       <button data-v="catalog" class="on">แคตตาล็อก</button>
       <button data-v="mine">คำขอของฉัน</button>
+      <button data-v="stock">Stock คงเหลือ</button>
       <button data-v="admin">ผู้ดูแล / Stock<span class="n hide" id="pendN">0</span></button>
     </nav>
     <button class="cartbtn" id="openCart">🛒 ตะกร้า <span class="n" id="cartN">0</span></button>
@@ -251,6 +254,26 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
       <button class="btn pri sm" style="flex:0" id="mineLoad">ดูคำขอ</button>
     </div>
     <div id="mineList" class="reqs"><div class="empty">ใส่รหัสพนักงานเพื่อดูสถานะคำขอ</div></div>
+  </section>
+
+  <!-- PUBLIC STOCK (read-only) -->
+  <section id="v-stock" class="hide">
+    <div class="toolbar"><h2 style="margin:0;font-size:24px;flex:1">Stock คงเหลือ</h2><span style="color:var(--mute);font-size:15px" id="vTime"></span></div>
+    <div class="stats" id="vStats"></div>
+    <div class="toolbar">
+      <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="vq" type="search" placeholder="ค้นหาสินค้า / รหัส / ที่เก็บ"></div>
+      <select class="sel" id="vCat"></select>
+      <select class="sel" id="vFilter">
+        <option value="">ทุกรายการ</option>
+        <option value="has">มีของ</option>
+        <option value="low">ใกล้หมด / ถึงจุดสั่งซื้อ</option>
+        <option value="out">หมดคลัง</option>
+      </select>
+      <button class="btn sec sm" id="vReload">↻ รีเฟรช</button>
+      <button class="btn sec sm" id="vExp">⬇ CSV</button>
+    </div>
+    <div class="tbl-wrap"><table class="t" id="vTbl"></table></div>
   </section>
 
   <!-- ADMIN -->
@@ -941,11 +964,41 @@ async function loadInit(){
     const r = await api('init');
     seeded = r.seeded; applyServerItems(r.items);
     $('#deptList').innerHTML = r.depts.map(d => `<option value="${esc(d)}">`).join('');
-    renderChips(); renderGrid(); renderCart();
+    renderChips(); renderGrid(); renderCart(); renderPubStock();
     if (admin()) { renderStock(); renderCount(); renderReorder(); renderSeed(); }
   } catch (e) {
     const b = $('#banner'); b.textContent = 'โหลดข้อมูล stock ไม่สำเร็จ: ' + e.message; b.style.display = 'block';
   }
+}
+
+/* public read-only stock */
+const stState = s => s.onHand <= 0 ? 'out' : (s.min > 0 && s.onHand <= s.min ? 'low' : 'ok');
+function pubRows(){
+  const c = $('#vCat').value, f = $('#vFilter').value;
+  return search(ITEMS.filter(x => STOCK[x.code] && active(x) && (!c || x.cat === c)), $('#vq').value, x => x.th+' '+x.en+' '+x.cn+' '+x.code+' '+(STOCK[x.code].location||''))
+    .filter(x => { const st = stState(STOCK[x.code]); return !f || (f === 'has' && STOCK[x.code].onHand > 0) || f === st; });
+}
+function renderPubStock(){
+  if (!stockLoaded) { $('#vTbl').innerHTML = `<tbody><tr><td class="loading"><span class="spin"></span> กำลังโหลด…</td></tr></tbody>`; return; }
+  if (!seeded) { $('#vStats').innerHTML = ''; $('#vTbl').innerHTML = `<tbody><tr><td class="empty">ยังไม่มีข้อมูล stock — รอผู้ดูแลนำเข้ารายการสินค้าและบันทึกยอดยกมา</td></tr></tbody>`; return; }
+  const all = ITEMS.filter(x => STOCK[x.code] && active(x));
+  const cnt = k => all.filter(x => stState(STOCK[x.code]) === k).length;
+  $('#vStats').innerHTML = [['รายการสินค้า', int(all.length), 'var(--ink)'], ['มีของ', int(all.filter(x => STOCK[x.code].onHand > 0).length), 'var(--ok)'], ['ใกล้หมด', int(cnt('low')), 'var(--warn)'], ['หมดคลัง', int(cnt('out')), 'var(--bad)']]
+    .map(([k, v, col]) => `<div class="stat"><div class="k">${k}</div><div class="v" style="color:${col}">${v}</div></div>`).join('');
+  const rows = pubRows();
+  $('#vTbl').innerHTML = `<thead><tr><th></th><th>รหัส</th><th>รายการ</th><th>หมวด</th><th>ที่เก็บ</th><th class="n">คงเหลือ</th><th>หน่วย</th><th>สถานะ</th><th></th></tr></thead><tbody>` +
+    (rows.length ? rows.map(x => { const s = STOCK[x.code], st = stState(s);
+      return `<tr class="${st === 'out' ? 'out' : st === 'low' ? 'low' : ''}"><td style="width:56px">${x.noimg ? '📦' : `<img src="${img(x.code)}" alt="" loading="lazy" style="width:44px;height:44px;object-fit:contain">`}</td>
+        <td class="mono">${x.code}</td><td><span class="linkbtn" style="text-decoration:none;cursor:pointer" data-detail="${x.code}">${esc(x.th || x.en)}</span><div style="font-size:13px;color:var(--mute)">${esc(x.en)}</div></td>
+        <td>${CATNAME[x.cat] || ''}</td><td>${esc(s.location || '-')}</td><td class="n"><b style="font-size:20px">${int(s.onHand)}</b></td><td>${esc(x.unit)}</td>
+        <td>${st === 'out' ? '<span class="s-out">● หมด</span>' : st === 'low' ? '<span class="s-low">● ใกล้หมด</span>' : '<span class="s-ok">● มีของ</span>'}</td>
+        <td class="qc" data-code="${x.code}">${qtyCtl(x.code)}</td></tr>`; }).join('') : `<tr><td colspan="9" class="empty">ไม่พบรายการ</td></tr>`) + '</tbody>';
+  $('#vTime').textContent = 'อัปเดต ' + new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'});
+}
+function exportPub(){
+  const rows = [['รหัสสินค้า','รายการ','English','หมวด','ที่เก็บ','คงเหลือ','หน่วย','สถานะ']];
+  pubRows().forEach(x => { const s = STOCK[x.code], st = stState(s); rows.push([x.code, x.th, x.en, CATNAME[x.cat], s.location, s.onHand, x.unit, st === 'out' ? 'หมด' : st === 'low' ? 'ใกล้หมด' : 'มีของ']); });
+  downloadCSV(`stock-คงเหลือ-${today()}.csv`, rows);
 }
 
 /* requests */
@@ -1186,10 +1239,11 @@ function goSub(s){
 /* ---------- views ---------- */
 function go(v){
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
-  ['catalog','mine','admin'].forEach(k => $('#v-' + k).classList.toggle('hide', k !== v));
+  ['catalog','mine','stock','admin'].forEach(k => $('#v-' + k).classList.toggle('hide', k !== v));
   try { history.replaceState(null, '', v === 'catalog' ? location.pathname + location.search : '#' + v); } catch {}
   if (v === 'mine') { if (!$('#mineEmp').value) $('#mineEmp').value = ls.get('sr_profile', {}).empId || ''; if ($('#mineEmp').value) loadMine(); }
   if (v === 'admin') showAdmin();
+  if (v === 'stock') { renderPubStock(); loadInit(); }
   window.scrollTo(0, 0);
 }
 
@@ -1278,15 +1332,17 @@ $('#cq').addEventListener('input', renderCount); $('#cCat').addEventListener('ch
 $('#cSave').onclick = saveCount; $('#cSheet').onclick = countSheet;
 $('#tLoad').onclick = loadTxns; ['#tFrom','#tTo','#tType'].forEach(s => $(s).addEventListener('change', loadTxns));
 $('#tq').addEventListener('input', renderTxns); $('#expTxn').onclick = exportTxns;
+$('#vq').addEventListener('input', renderPubStock); ['#vCat','#vFilter'].forEach(s => $(s).addEventListener('change', renderPubStock));
+$('#vReload').onclick = loadInit; $('#vExp').onclick = exportPub;
 $('#pLoad').onclick = loadRep; ['#pFrom','#pTo'].forEach(s => $(s).addEventListener('change', loadRep)); $('#expRep').onclick = exportRep;
 
 const catOpts = `<option value="">ทุกหมวด</option>` + CATS.slice(1).map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
-$('#sCat').innerHTML = catOpts; $('#cCat').innerHTML = catOpts;
+$('#sCat').innerHTML = catOpts; $('#vCat').innerHTML = catOpts; $('#cCat').innerHTML = catOpts;
 const tm = thisMonth(); $('#tFrom').value = tm; $('#tTo').value = tm;
 const y0 = new Date().getFullYear() + '-01'; $('#pFrom').value = y0; $('#pTo').value = tm;
 if (DEMO) { const b = $('#banner'); b.classList.add('demo'); b.innerHTML = '🧪 <b>โหมดทดลอง</b> — ยังไม่ได้เชื่อม Google Sheet ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น · PIN ผู้ดูแล = 1234'; b.style.display = 'block'; }
 renderChips(); renderGrid(); renderCart();
-const h = location.hash.slice(1); if (h === 'mine' || h === 'admin') go(h);
+const h = location.hash.slice(1); if (['mine','stock','admin'].includes(h)) go(h);
 loadInit();
 })();
 </script>
