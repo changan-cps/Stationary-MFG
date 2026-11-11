@@ -3,7 +3,7 @@ var SR_SCHEMA = {
   Items:    ['code','th','en','cn','unit','cat','priceEx','priceInc','supplier','onHand','min','max','location','active'],
   Requests: ['id','at','empId','name','dept','cc','tel','need','purpose','status','totalInc','note','actionBy','actionAt','issuedAt'],
   ReqLines: ['reqId','code','th','en','unit','qty','priceInc','supplier','issuedQty'],
-  Txns:     ['id','at','type','code','th','qty','balance','ref','dept','by','note','priceInc']
+  Txns:     ['id','at','type','code','th','qty','balance','ref','dept','by','note','priceInc','attach']
 };
 var SR_PUBLIC = { init:1, submit:1, myRequests:1, cancel:1, checkPin:1 };
 
@@ -140,12 +140,17 @@ function srCore(store) {
     },
 
     receive: function (p) {
-      var items = itemMap(), tx = [];
+      var items = itemMap(), tx = [], files = p.files || [];
+      if (files.length > 5) fail('แนบไฟล์ได้ไม่เกิน 5 ไฟล์');
+      files.forEach(function (f) { if (!/^(image\/|application\/pdf)/.test(str(f.mime))) fail('รองรับเฉพาะรูปภาพหรือ PDF: ' + f.name); });
+      var hasLine = (p.lines || []).some(function (l) { return Math.floor(num(l.qty)) > 0; });
+      if (!hasLine) fail('ไม่มีรายการรับเข้า');
+      var attach = files.map(function (f) { return store.saveFile(f, str(p.ref)); }).join(' ');
       (p.lines || []).forEach(function (l) {
         var q = Math.floor(num(l.qty)); if (q <= 0) return;
-        tx.push(addTxn(items, 'IN', l.code, q, str(p.ref), '', str(p.by), str(p.note)));
+        var t = addTxn(items, 'IN', l.code, q, str(p.ref), '', str(p.by), str(p.note));
+        t.attach = attach; tx.push(t);
       });
-      if (!tx.length) fail('ไม่มีรายการรับเข้า');
       store.append('Txns', tx);
       return { ok: true, txns: tx.length };
     },
@@ -214,17 +219,31 @@ function srSpreadsheet() {
   return ss;
 }
 
+/* โฟลเดอร์ใน Google Drive สำหรับเก็บไฟล์แนบใบ PO (สร้างให้อัตโนมัติ หรือกำหนด PO_FOLDER_ID เอง) */
+function srFolder() {
+  var props = PropertiesService.getScriptProperties(), id = props.getProperty('PO_FOLDER_ID');
+  if (id) { try { return DriveApp.getFolderById(id.trim()); } catch (e) {} }
+  var f = DriveApp.createFolder('Stationery PO');
+  props.setProperty('PO_FOLDER_ID', f.getId());
+  return f;
+}
+
 function SheetStore() {
   var ss = srSpreadsheet();
   var cache = {};
   function sheet(name) {
     var sh = ss.getSheetByName(name);
+    var h = SR_SCHEMA[name];
     if (!sh) {
       sh = ss.insertSheet(name);
-      var h = SR_SCHEMA[name];
       sh.getRange(1, 1, 1, h.length).setValues([h]).setFontWeight('bold').setBackground('#0b3d91').setFontColor('#ffffff');
       sh.getRange(1, 1, sh.getMaxRows(), h.length).setNumberFormat('@');
       sh.setFrozenRows(1);
+    } else if (sh.getLastColumn() < h.length) {   // เพิ่มคอลัมน์ใหม่ให้ชีตเดิม (เช่น attach)
+      var from = sh.getLastColumn() + 1, extra = h.slice(from - 1);
+      if (sh.getMaxColumns() < h.length) sh.insertColumnsAfter(sh.getMaxColumns(), h.length - sh.getMaxColumns());
+      sh.getRange(1, from, 1, extra.length).setValues([extra]).setFontWeight('bold').setBackground('#0b3d91').setFontColor('#ffffff');
+      sh.getRange(1, from, sh.getMaxRows(), extra.length).setNumberFormat('@');
     }
     return sh;
   }
@@ -264,6 +283,12 @@ function SheetStore() {
         obj[k] = patch[k];
       }
     },
+    saveFile: function (f, ref) {
+      var blob = Utilities.newBlob(Utilities.base64Decode(f.data), f.mime || 'image/jpeg', (ref ? ref + '_' : '') + (f.name || 'file'));
+      var file = srFolder().createFile(blob);
+      try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) {}
+      return file.getUrl();
+    },
     pin: function () { return PropertiesService.getScriptProperties().getProperty('ADMIN_PIN') || '1234'; }
   };
 }
@@ -297,4 +322,5 @@ function setupSheets() {
     if (def && def.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(def);
   });
   Logger.log('Google Sheet ที่ใช้เก็บข้อมูล: ' + ss.getUrl());
+  Logger.log('โฟลเดอร์ไฟล์แนบใบ PO: ' + srFolder().getUrl());
 }

@@ -203,6 +203,15 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
 .pick .dd div:hover{background:var(--soft)}
 .issue td input.ni{width:80px}
 .demo{background:#ede7fb;color:var(--info)}
+.drop{border:2px dashed #c3cde0;border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fafbfd;margin-bottom:12px}
+.drop.over{border-color:var(--brand2);background:var(--soft)}
+.drop .hint{color:var(--mute);font-size:15px;flex:1;min-width:220px}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap}
+.thumb{position:relative;width:110px;height:110px;border:1px solid var(--line);border-radius:10px;background:#fff;display:grid;place-items:center;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .pdf{font-size:15px;text-align:center;padding:6px;color:var(--bad);font-weight:700;word-break:break-all}
+.thumb button{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(20,33,61,.75);color:#fff;font-size:16px;line-height:26px;padding:0}
+.att a{display:inline-block;margin-right:6px;font-size:15px;color:var(--brand2);font-weight:600;white-space:nowrap}
 .linkbtn{border:0;background:none;color:var(--brand2);font-weight:600;padding:0;font-size:inherit;text-decoration:underline}
 .spin{display:inline-block;width:18px;height:18px;border:2.5px solid #c9d4ea;border-top-color:var(--brand);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-3px}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -363,6 +372,12 @@ table.t tr.low td{background:#fffaf0} table.t tr.out td{background:#fff5f4}
             <label>เลขที่อ้างอิง (PO / Invoice / DO) <span class="req">*</span><input id="rRef"></label>
             <label>หมายเหตุ<input id="rNote"></label>
           </div>
+          <div class="drop" id="rDrop">
+            <label class="btn sec sm" style="cursor:pointer">📎 แนบใบ PO / Invoice
+              <input type="file" id="rFile" accept="image/*,application/pdf" multiple hidden></label>
+            <div class="hint">รูปภาพ หรือ PDF · สูงสุด 5 ไฟล์ · ถ่ายรูปจากมือถือได้ · หรือลากไฟล์มาวางตรงนี้</div>
+            <div class="thumbs" id="rThumbs"></div>
+          </div>
           <div class="pick">
             <div class="search" style="min-width:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
               <input id="rPick" placeholder="พิมพ์ชื่อ/รหัสสินค้าเพื่อเพิ่มรายการรับเข้า"></div>
@@ -457,7 +472,7 @@ var SR_SCHEMA = {
   Items:    ['code','th','en','cn','unit','cat','priceEx','priceInc','supplier','onHand','min','max','location','active'],
   Requests: ['id','at','empId','name','dept','cc','tel','need','purpose','status','totalInc','note','actionBy','actionAt','issuedAt'],
   ReqLines: ['reqId','code','th','en','unit','qty','priceInc','supplier','issuedQty'],
-  Txns:     ['id','at','type','code','th','qty','balance','ref','dept','by','note','priceInc']
+  Txns:     ['id','at','type','code','th','qty','balance','ref','dept','by','note','priceInc','attach']
 };
 var SR_PUBLIC = { init:1, submit:1, myRequests:1, cancel:1, checkPin:1 };
 
@@ -594,12 +609,17 @@ function srCore(store) {
     },
 
     receive: function (p) {
-      var items = itemMap(), tx = [];
+      var items = itemMap(), tx = [], files = p.files || [];
+      if (files.length > 5) fail('แนบไฟล์ได้ไม่เกิน 5 ไฟล์');
+      files.forEach(function (f) { if (!/^(image\/|application\/pdf)/.test(str(f.mime))) fail('รองรับเฉพาะรูปภาพหรือ PDF: ' + f.name); });
+      var hasLine = (p.lines || []).some(function (l) { return Math.floor(num(l.qty)) > 0; });
+      if (!hasLine) fail('ไม่มีรายการรับเข้า');
+      var attach = files.map(function (f) { return store.saveFile(f, str(p.ref)); }).join(' ');
       (p.lines || []).forEach(function (l) {
         var q = Math.floor(num(l.qty)); if (q <= 0) return;
-        tx.push(addTxn(items, 'IN', l.code, q, str(p.ref), '', str(p.by), str(p.note)));
+        var t = addTxn(items, 'IN', l.code, q, str(p.ref), '', str(p.by), str(p.note));
+        t.attach = attach; tx.push(t);
       });
-      if (!tx.length) fail('ไม่มีรายการรับเข้า');
       store.append('Txns', tx);
       return { ok: true, txns: tx.length };
     },
@@ -691,6 +711,7 @@ function localStore(){
     all(n){ if (!cache[n]) { cache[n] = ls.get(key(n), []); cache[n].forEach((r, i) => r._row = i); } return cache[n]; },
     append(n, rows){ const a = this.all(n); rows.forEach(r => { const o = {...r, _row: a.length}; a.push(o); }); ls.set(key(n), a); },
     update(n, obj, patch){ Object.assign(obj, patch); ls.set(key(n), this.all(n)); },
+    saveFile(f){ return 'demo:' + f.name; },
     pin(){ return '1234'; }
   };
 }
@@ -1131,6 +1152,40 @@ function pickDD(){
   dd.innerHTML = r.map(x => `<div data-pick="${x.code}"><span>${esc(x.th || x.en)} <span class="mono" style="color:var(--mute)">${x.code}</span></span><span style="color:var(--mute)">คงเหลือ ${int(STOCK[x.code].onHand)}</span></div>`).join('') || `<div>ไม่พบ</div>`;
   dd.classList.add('on');
 }
+let recvFiles = [];
+function renderThumbs(){
+  $('#rThumbs').innerHTML = recvFiles.map((f, i) => `<div class="thumb" title="${esc(f.name)}">${f.mime.startsWith('image/') ? `<img src="${f.preview}" alt="">` : `<div class="pdf">PDF<br><span style="font-weight:400;color:var(--mute);font-size:12px">${esc(f.name.slice(0, 24))}</span></div>`}<button data-frm="${i}" aria-label="ลบไฟล์">×</button></div>`).join('');
+}
+function shrinkImage(file){
+  return new Promise((ok, bad) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 1800 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); bad(new Error('เปิดรูปไม่ได้: ' + file.name)); };
+    im.src = url;
+  });
+}
+const readDataURL = file => new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => bad(r.error); r.readAsDataURL(file); });
+async function addFiles(list){
+  const err = $('#rErr'); err.textContent = '';
+  for (const f of list) {
+    if (recvFiles.length >= 5) { err.textContent = 'แนบได้สูงสุด 5 ไฟล์'; break; }
+    const isImg = f.type.startsWith('image/'), isPdf = f.type === 'application/pdf';
+    if (!isImg && !isPdf) { err.textContent = 'รองรับเฉพาะรูปภาพหรือ PDF: ' + f.name; continue; }
+    if (isPdf && f.size > 10 * 1024 * 1024) { err.textContent = 'ไฟล์ PDF ใหญ่เกิน 10 MB: ' + f.name; continue; }
+    try {
+      const url = isImg ? await shrinkImage(f) : await readDataURL(f);
+      const name = isImg ? f.name.replace(/\.[^.]+$/, '') + '.jpg' : f.name;
+      recvFiles.push({name, mime: isImg ? 'image/jpeg' : 'application/pdf', data: url.split(',')[1], preview: url});
+    } catch (e) { err.textContent = e.message; }
+  }
+  renderThumbs();
+}
+
 async function saveRecv(){
   const err = $('#rErr'); err.textContent = '';
   const ref = $('#rRef').value.trim();
@@ -1138,9 +1193,14 @@ async function saveRecv(){
   const lines = recv.filter(l => n0(l.qty) > 0);
   if (!lines.length) { err.textContent = 'ยังไม่มีรายการรับเข้า'; return; }
   const b = $('#rSave'); b.disabled = true;
-  try { await api('receive', {ref, note: $('#rNote').value.trim(), lines}); toast(`รับเข้า ${lines.length} รายการแล้ว`); recv = []; $('#rRef').value = ''; $('#rNote').value = ''; await loadInit(); renderRecv(); }
+  b.innerHTML = '<span class="spin"></span> กำลังบันทึก' + (recvFiles.length ? 'และอัปโหลดไฟล์…' : '…');
+  try {
+    await api('receive', {ref, note: $('#rNote').value.trim(), lines, files: recvFiles.map(f => ({name: f.name, mime: f.mime, data: f.data}))});
+    toast(`รับเข้า ${lines.length} รายการแล้ว` + (recvFiles.length ? ` · แนบ ${recvFiles.length} ไฟล์` : ''));
+    recv = []; recvFiles = []; $('#rRef').value = ''; $('#rNote').value = ''; renderThumbs(); txns = []; await loadInit(); renderRecv();
+  }
   catch (e) { err.textContent = 'บันทึกไม่สำเร็จ: ' + e.message; }
-  finally { b.disabled = false; }
+  finally { b.disabled = false; b.textContent = 'บันทึกรับเข้า'; }
 }
 
 /* count */
@@ -1175,17 +1235,20 @@ async function loadTxns(){
   try { txns = (await api('txns', {from: $('#tFrom').value, to: $('#tTo').value, type: $('#tType').value})).txns; renderTxns(); }
   catch (e) { $('#txnTbl').innerHTML = `<tbody><tr><td>โหลดไม่สำเร็จ: ${esc(e.message)}</td></tr></tbody>`; }
 }
+function attLinks(a){
+  return String(a || '').split(/\s+/).filter(Boolean).map((u, i) => /^https:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">📎 ไฟล์ ${i + 1}</a>` : `<span style="color:var(--mute)">📎 ${esc(u.replace(/^demo:/, ''))}</span>`).join('');
+}
 function txnRows(){ return search(txns, $('#tq').value, t => [t.code, t.th, t.ref, t.dept, t.by, t.note].join(' ')); }
 function renderTxns(){
   const rows = txnRows();
-  $('#txnTbl').innerHTML = `<thead><tr><th>วันที่</th><th>ประเภท</th><th>รหัส</th><th>รายการ</th><th class="n">จำนวน</th><th class="n">คงเหลือหลังทำรายการ</th><th>อ้างอิง</th><th>แผนก</th><th>ผู้ทำรายการ</th><th>หมายเหตุ</th></tr></thead><tbody>` +
+  $('#txnTbl').innerHTML = `<thead><tr><th>วันที่</th><th>ประเภท</th><th>รหัส</th><th>รายการ</th><th class="n">จำนวน</th><th class="n">คงเหลือหลังทำรายการ</th><th>อ้างอิง</th><th>แผนก</th><th>ผู้ทำรายการ</th><th>หมายเหตุ</th><th>เอกสาร</th></tr></thead><tbody>` +
     (rows.length ? rows.map(t => `<tr><td style="white-space:nowrap">${fmtDate(t.at)}</td><td><span class="badge ${t.type === 'IN' ? 'b-issued' : t.type === 'OUT' ? 'b-approved' : 'b-pending'}">${TT[t.type] || t.type}</span></td>
       <td class="mono">${esc(t.code)}</td><td>${esc(t.th)}</td><td class="n"><b class="${n0(t.qty) > 0 ? 'diffp' : 'diffn'}">${n0(t.qty) > 0 ? '+' : ''}${int(t.qty)}</b></td><td class="n">${int(t.balance)}</td>
-      <td class="mono">${esc(t.ref)}</td><td>${esc(t.dept)}</td><td>${esc(t.by)}</td><td>${esc(t.note)}</td></tr>`).join('') : `<tr><td colspan="10" class="empty">ไม่มีรายการ</td></tr>`) + '</tbody>';
+      <td class="mono">${esc(t.ref)}</td><td>${esc(t.dept)}</td><td>${esc(t.by)}</td><td>${esc(t.note)}</td><td class="att">${attLinks(t.attach)}</td></tr>`).join('') : `<tr><td colspan="11" class="empty">ไม่มีรายการ</td></tr>`) + '</tbody>';
 }
 function exportTxns(){
-  const rows = [['วันที่','ประเภท','รหัสสินค้า','รายการ','จำนวน','คงเหลือหลังทำรายการ','อ้างอิง','แผนก','ผู้ทำรายการ','หมายเหตุ','ราคา/หน่วย รวม VAT']];
-  txnRows().forEach(t => rows.push([fmtDate(t.at), TT[t.type], t.code, t.th, t.qty, t.balance, t.ref, t.dept, t.by, t.note, t.priceInc]));
+  const rows = [['วันที่','ประเภท','รหัสสินค้า','รายการ','จำนวน','คงเหลือหลังทำรายการ','อ้างอิง','แผนก','ผู้ทำรายการ','หมายเหตุ','ราคา/หน่วย รวม VAT','ไฟล์แนบ']];
+  txnRows().forEach(t => rows.push([fmtDate(t.at), TT[t.type], t.code, t.th, t.qty, t.balance, t.ref, t.dept, t.by, t.note, t.priceInc, t.attach || '']));
   downloadCSV(`ความเคลื่อนไหว-stock-${today()}.csv`, rows);
 }
 
@@ -1286,6 +1349,7 @@ document.addEventListener('click', async e => {
     catch (er) { toast(er.message); t.disabled = false; t.dataset.sure = ''; t.textContent = '📦 จ่ายของ (ตัด stock)'; }
   }
   else if (d.rrm) { recv.splice(+d.rrm, 1); renderRecv(); }
+  else if (d.frm) { recvFiles.splice(+d.frm, 1); renderThumbs(); }
   else if (t.id === 'seedBtn') seed();
 });
 document.addEventListener('change', e => {
@@ -1326,7 +1390,12 @@ $('#saveMM').onclick = saveMM; $('#expStock').onclick = exportStock;
 $('#expReorder').onclick = exportReorder;
 $('#reorderToRecv').onclick = () => { recv = reorderList.filter(r => r.sug > 0).map(r => ({code: r.x.code, qty: r.sug})); goSub('recv'); toast('เพิ่มรายการแนะนำสั่งซื้อในหน้ารับเข้าแล้ว — แก้จำนวนตามที่ได้รับจริง'); };
 $('#rPick').addEventListener('input', pickDD); $('#rPick').addEventListener('focus', pickDD);
-$('#rSave').onclick = saveRecv; $('#rClear').onclick = () => { recv = []; renderRecv(); };
+$('#rSave').onclick = saveRecv; $('#rClear').onclick = () => { recv = []; recvFiles = []; renderThumbs(); renderRecv(); };
+$('#rFile').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
+const drop = $('#rDrop');
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
 $('#cq').addEventListener('input', renderCount); $('#cCat').addEventListener('change', renderCount);
 $('#cSave').onclick = saveCount; $('#cSheet').onclick = countSheet;
 $('#tLoad').onclick = loadTxns; ['#tFrom','#tTo','#tType'].forEach(s => $(s).addEventListener('change', loadTxns));
